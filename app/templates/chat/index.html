@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Campus Chat – PassItOn{% endblock %}
+
+{% block content %}
+<div class="py-2">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-chat-dots-fill text-teal me-2" style="color: #0f766e;"></i> Student Messaging</h4>
+            <small class="text-muted">Chat directly with campus buyers and sellers</small>
+        </div>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="card card-campus border-0 shadow-sm p-0 overflow-hidden">
+        <div class="row g-0" style="min-height: 560px;">
+            <!-- Left Sidebar: Conversations List -->
+            <div class="col-md-4 col-lg-4 border-end bg-light d-flex flex-column" style="max-height: 560px;">
+                <div class="p-3 border-bottom bg-white">
+                    <span class="fw-bold text-dark small text-uppercase">Conversations ({{ conversations|length }})</span>
+                </div>
+
+                <div class="overflow-auto flex-grow-1">
+                    {% if conversations %}
+                        <div class="list-group list-group-flush">
+                            {% for c in conversations %}
+                                {% set other = c.other_user(current_user.id) %}
+                                {% set unread = c.unread_count_for(current_user.id) %}
+                                <a href="{{ url_for('chat.index', convo_id=c.id) }}" class="list-group-item list-group-item-action p-3 {% if active_convo and active_convo.id == c.id %}active bg-white border-start border-4 border-teal text-dark{% endif %}">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="{{ url_for('static', filename=other.profile_pic) }}" alt="{{ other.name }}" class="rounded-circle border" style="width: 42px; height: 42px; object-fit: cover;">
+                                        <div class="flex-grow-1 overflow-hidden">
+                                            <div class="d-flex justify-content-between align-items-baseline">
+                                                <div class="fw-bold small text-truncate" style="max-width: 140px;">{{ other.name }}</div>
+                                                <small class="text-muted" style="font-size: 0.7rem;">{{ c.updated_at.strftime('%d %b') }}</small>
+                                            </div>
+                                            {% if c.listing %}
+                                                <div class="small text-teal text-truncate fw-semibold" style="color: #0f766e; font-size: 0.75rem;">
+                                                    <i class="bi bi-tag-fill me-1"></i>{{ c.listing.title }}
+                                                </div>
+                                            {% endif %}
+                                            {% if c.messages %}
+                                                <div class="small text-muted text-truncate" style="font-size: 0.75rem;">
+                                                    {{ c.messages[-1].content }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        {% if unread > 0 %}
+                                            <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem;">{{ unread }}</span>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted small p-3">
+                            <i class="bi bi-chat-square-dots fs-2 d-block mb-2 text-muted"></i>
+                            No chats yet. Click "Chat with Seller" on any listing to start a conversation!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right: Active Chat Area -->
+            <div class="col-md-8 col-lg-8 d-flex flex-column bg-white" style="max-height: 560px;">
+                {% if active_convo %}
+                    {% set chat_partner = active_convo.other_user(current_user.id) %}
+                    
+                    <!-- Chat Header -->
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="{{ url_for('static', filename=chat_partner.profile_pic) }}" alt="{{ chat_partner.name }}" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <div class="fw-bold small mb-0">{{ chat_partner.name }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ chat_partner.department }} • {{ chat_partner.college }}</div>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('auth.view_user', user_id=chat_partner.id) }}" class="btn btn-outline-secondary btn-sm" style="font-size: 0.75rem;">
+                            View Profile
+                        </a>
+                    </div>
+
+                    <!-- Item Context Card (Feature 5 Requirement) -->
+                    {% if active_convo.listing %}
+                        <div class="p-2 px-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ url_for('static', filename=active_convo.listing.primary_image) }}" class="rounded border" style="width: 36px; height: 36px; object-fit: cover;">
+                                <div class="small">
+                                    <span class="fw-bold text-dark">{{ active_convo.listing.title }}</span>
+                                    <span class="text-teal ms-1 fw-bold" style="color: #0f766e;">₹{{ "{:,.0f}".format(active_convo.listing.price) }}</span>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('listings.detail', listing_id=active_convo.listing.id) }}" class="btn btn-sm btn-campus-outline py-0 px-2" style="font-size: 0.72rem;">
+                                View Item
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <!-- Messages History Viewport -->
+                    <div class="chat-messages p-3 flex-grow-1 overflow-auto d-flex flex-column gap-2" id="chat-messages-box">
+                        {% for msg in messages %}
+                            <div class="chat-bubble {% if msg.sender_id == current_user.id %}mine{% else %}other{% endif %}">
+                                <div class="fw-semibold small {% if msg.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}" style="font-size: 0.7rem;">
+                                    {{ msg.sender.name }}
+                                </div>
+                                <div>{{ msg.content }}</div>
+                                <div class="chat-bubble-time">{{ msg.created_at.strftime('%I:%M %p') }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Chat Send Form -->
+                    <div class="p-3 border-top bg-light">
+                        <form id="chat-form" data-conversation-id="{{ active_convo.id }}" class="d-flex gap-2">
+                            <input type="text" id="message-content-input" class="form-control" placeholder="Type a message (meetup spot, price, availability)..." autocomplete="off" required>
+                            <button type="submit" class="btn btn-campus px-3">
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                {% else %}
+                    <!-- No Active Chat Selected -->
+                    <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted p-5">
+                        <i class="bi bi-chat-square-heart fs-1 mb-2 text-teal" style="color: #0f766e;"></i>
+                        <h5 class="fw-bold text-dark">Your Campus Conversations</h5>
+                        <p class="small text-center max-w-400">Select a conversation from the left, or browse items and click "Chat with Seller" to connect with a fellow student.</p>
+                        <a href="{{ url_for('listings.index') }}" class="btn btn-campus btn-sm mt-2">Browse Items</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

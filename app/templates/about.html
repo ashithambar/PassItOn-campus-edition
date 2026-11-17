@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}About – PassItOn Campus Edition{% endblock %}
+
+{% block content %}
+<div class="max-w-800 mx-auto py-3">
+    <div class="card card-campus border-0 shadow-sm p-4 p-md-5">
+        <div class="text-center mb-4">
+            <div class="brand-badge d-inline-flex align-items-center gap-2 px-3 py-2 fs-5 mb-2">
+                <i class="bi bi-mortarboard-fill"></i>
+                <span>PassItOn – Campus Edition</span>
+            </div>
+            <h4 class="text-muted fw-normal mt-2">"One student's unused item becomes another student's useful item."</h4>
+        </div>
+
+        <hr class="my-4">
+
+        <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb-fill text-warning me-2"></i> Project Mission & Overview</h5>
+        <p class="text-muted">
+            College students spend thousands of rupees each semester on textbooks, scientific calculators, laboratory coats, drafting instruments, and hostel gear. At the end of the term, these items often sit idle in dorm rooms or end up in landfills. Meanwhile, junior students entering the new semester pay high retail prices for the exact same items.
+        </p>
+        <p class="text-muted">
+            <strong>PassItOn</strong> solves this campus-wide problem by providing a localized, verified student marketplace. Students buy, sell, and reuse items directly within the campus perimeter, eliminating shipping charges, middleman commissions, and fraud risks.
+        </p>
+
+        <h5 class="fw-bold mt-4 mb-3"><i class="bi bi-code-slash text-primary me-2"></i> Architecture & Tech Stack</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="fw-bold text-dark mb-1">Backend Framework</div>
+                    <div class="text-muted small">Python 3.14 + Flask (Modular Blueprint Architecture)</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="fw-bold text-dark mb-1">Database & ORM</div>
+                    <div class="text-muted small">SQLite with SQLAlchemy (Full Foreign Keys & Relational Cascades)</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="fw-bold text-dark mb-1">Authentication & Security</div>
+                    <div class="text-muted small">Flask-Login, Werkzeug password hashing, Flask-WTF CSRF protection</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="fw-bold text-dark mb-1">QR Generation & Scanning</div>
+                    <div class="text-muted small">Python `qrcode` + Pillow, Client camera `html5-qrcode`</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="fw-bold text-dark mb-1">UI & Dashboard</div>
+                    <div class="text-muted small">Bootstrap 5, Custom CSS, Vanilla JS, Chart.js Analytics</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="p-3 bg-light rounded-3 border">
+                    <div class="fw-bold text-dark mb-1">Algorithmic Innovation</div>
+                    <div class="text-muted small">Rule-based Smart Price Suggestion (condition + age + category blend)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info d-flex align-items-center gap-3">
+            <i class="bi bi-info-circle-fill fs-3 text-info"></i>
+            <div class="small">
+                <strong>Academic Mini-Project Submission:</strong>
+                All payment channels, UPI displays, and handover QR verification flows operate in a standalone demo environment suitable for offline viva evaluations and local campus hosting.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

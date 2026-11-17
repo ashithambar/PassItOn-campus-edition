@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}My Wishlist – PassItOn{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1">My Saved Items (Wishlist)</h3>
+            <p class="text-muted small mb-0">Items you have saved to keep track of prices and availability</p>
+        </div>
+        <a href="{{ url_for('listings.index') }}" class="btn btn-campus-outline btn-sm">
+            <i class="bi bi-search me-1"></i> Browse More Items
+        </a>
+    </div>
+
+    {% if items %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for entry in items %}
+                {% set item = entry.listing %}
+                <div class="col">
+                    <div class="card card-campus h-100 position-relative {% if item.status != 'available' %}opacity-75{% endif %}">
+                        <div class="card-img-wrapper">
+                            <img src="{{ url_for('static', filename=item.primary_image) }}" alt="{{ item.title }}">
+
+                            <!-- Status Badge if Sold / Unavailable (Feature 7 Requirement) -->
+                            <div class="position-absolute top-0 start-0 m-2">
+                                {% if item.status == 'sold' %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-exclamation-circle-fill me-1"></i> SOLD OUT
+                                    </span>
+                                {% elif item.status == 'reserved' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="bi bi-clock-fill me-1"></i> RESERVED
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">Available</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Remove from wishlist button -->
+                            <form method="POST" action="{{ url_for('dashboard.remove_from_wishlist', wishlist_id=entry.id) }}" class="position-absolute top-0 end-0 m-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-light rounded-circle shadow-sm" title="Remove from Wishlist" style="width: 32px; height: 32px; padding: 0;">
+                                    <i class="bi bi-x-lg text-danger"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="card-body p-3 d-flex flex-column">
+                            <div class="small text-muted text-uppercase mb-1" style="font-size: 0.7rem;">
+                                {{ item.category.name }}
+                            </div>
+                            <h6 class="card-title fw-bold mb-2">
+                                <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="text-decoration-none text-dark">
+                                    {{ item.title }}
+                                </a>
+                            </h6>
+
+                            <div class="d-flex align-items-baseline gap-2 mb-2">
+                                <span class="fs-5 fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(item.price) }}</span>
+                                {% if item.original_price and item.original_price > item.price %}
+                                    <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="small text-muted mb-2">
+                                Seller: <strong>{{ item.seller.name }}</strong> ({{ item.seller.department }})
+                            </div>
+
+                            <div class="mt-auto pt-2 border-top d-flex gap-2">
+                                <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="btn btn-sm btn-campus flex-grow-1">
+                                    View Item
+                                </a>
+                                {% if item.status == 'available' %}
+                                    <a href="{{ url_for('orders.request_item', listing_id=item.id) }}" class="btn btn-sm btn-outline-success">
+                                        Buy
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state bg-white rounded-4 border p-5 shadow-sm text-center">
+            <div class="empty-state-icon text-muted mb-3"><i class="bi bi-heart"></i></div>
+            <h5 class="fw-bold">Your Wishlist is Empty</h5>
+            <p class="text-muted small">Save items by clicking the heart icon on any campus listing to track price drops and updates.</p>
+            <a href="{{ url_for('listings.index') }}" class="btn btn-campus">Browse Campus Items</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

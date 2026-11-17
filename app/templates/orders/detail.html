@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Order {{ order.order_number }} – PassItOn{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4 pb-2 border-bottom">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-secondary-subtle text-secondary font-monospace">{{ order.order_number }}</span>
+                <span class="badge 
+                    {% if order.status == 'completed' %}bg-success
+                    {% elif order.status in ['rejected', 'cancelled'] %}bg-danger
+                    {% elif order.status == 'handover_pending' %}bg-primary
+                    {% elif order.status == 'payment_completed' %}bg-info text-dark
+                    {% else %}bg-warning text-dark{% endif %} px-2 py-1">
+                    {{ order.status|replace('_', ' ')|capitalize }}
+                </span>
+            </div>
+            <h3 class="fw-bold mb-0">Order Tracking & Handover</h3>
+            <small class="text-muted">Initiated on {{ order.created_at.strftime('%d %B %Y at %I:%M %p') }}</small>
+        </div>
+
+        <div class="d-flex gap-2">
+            {% if current_user.id == order.buyer_id %}
+                <a href="{{ url_for('dashboard.my_purchases') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> My Purchases
+                </a>
+            {% else %}
+                <a href="{{ url_for('dashboard.requests_received') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Requests Received
+                </a>
+            {% endif %}
+            <a href="{{ url_for('chat.start', listing_id=order.listing.id) }}" class="btn btn-campus-outline btn-sm">
+                <i class="bi bi-chat-dots"></i> Open Chat
+            </a>
+        </div>
+    </div>
+
+    <!-- Visual Order Lifecycle Timeline (Feature 8) -->
+    <div class="card card-campus border-0 shadow-sm p-4 mb-4">
+        <h6 class="fw-bold text-muted small text-uppercase mb-3">Order Status Progress</h6>
+        <div class="timeline-wrapper">
+            <div class="timeline-steps">
+                <!-- 1. Request Sent -->
+                <div class="timeline-step {% if order.status in ['request_sent', 'accepted', 'payment_pending', 'payment_completed', 'payment_confirmed', 'handover_pending', 'completed'] %}completed{% endif %}">
+                    <div class="timeline-icon"><i class="bi bi-send-check"></i></div>
+                    <div class="timeline-title">Request Sent</div>
+                </div>
+
+                <!-- 2. Accepted -->
+                <div class="timeline-step {% if order.status in ['accepted', 'payment_pending', 'payment_completed', 'payment_confirmed', 'handover_pending', 'completed'] %}completed{% elif order.status == 'request_sent' %}active{% endif %}">
+                    <div class="timeline-icon"><i class="bi bi-check2-circle"></i></div>
+                    <div class="timeline-title">Seller Accepted</div>
+                </div>
+
+                <!-- 3. Payment -->
+                <div class="timeline-step {% if order.status in ['payment_confirmed', 'handover_pending', 'completed'] %}completed{% elif order.status in ['payment_pending', 'payment_completed'] %}active{% endif %}">
+                    <div class="timeline-icon"><i class="bi bi-credit-card"></i></div>
+                    <div class="timeline-title">{% if order.payment_method == 'upi' %}UPI Payment{% else %}Cash Choice{% endif %}</div>
+                </div>
+
+                <!-- 4. QR Handover -->
+                <div class="timeline-step {% if order.status == 'completed' %}completed{% elif order.status == 'handover_pending' %}active{% endif %}">
+                    <div class="timeline-icon"><i class="bi bi-qr-code-scan"></i></div>
+                    <div class="timeline-title">QR Handover</div>
+                </div>
+
+                <!-- 5. Completed -->
+                <div class="timeline-step {% if order.status == 'completed' %}completed{% endif %}">
+                    <div class="timeline-icon"><i class="bi bi-trophy-fill"></i></div>
+                    <div class="timeline-title">Completed</div>
+                </div>
+            </div>
+        </div>
+
+        {% if order.status in ['rejected', 'cancelled'] %}
+            <div class="alert alert-danger mt-3 mb-0 small">
+                <i class="bi bi-x-circle-fill me-1"></i> This order was {{ order.status }}. The item is now available for other students.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <!-- Left: Item & Parties Details -->
+        <div class="col-lg-7">
+            <!-- Item Card -->
+            <div class="card card-campus border-0 shadow-sm p-4 mb-4">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Item Details</h5>
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ url_for('static', filename=order.listing.primary_image) }}" alt="{{ order.listing.title }}" class="rounded-3 border" style="width: 85px; height: 85px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <span class="badge bg-secondary-subtle text-secondary small">{{ order.listing.category.name }}</span>
+                        <h6 class="fw-bold mb-1">
+                            <a href="{{ url_for('listings.detail', listing_id=order.listing.id) }}" class="text-decoration-none text-dark">
+                                {{ order.listing.title }}
+                            </a>
+                        </h6>
+                        <div class="small text-muted mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ order.listing.location }}</div>
+                        <div class="fs-5 fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(order.listing.price) }}</div>
+                    </div>
+                </div>
+
+                {% if order.notes %}
+                    <div class="mt-3 p-3 bg-light rounded-3 small">
+                        <strong>Handover Note from Buyer:</strong>
+                        <p class="mb-0 text-muted">{{ order.notes }}</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Buyer & Seller Info Cards -->
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <div class="card bg-white border p-3 rounded-3 shadow-sm h-100">
+                        <span class="text-muted small text-uppercase fw-semibold mb-2 d-block">Buyer (You{% if current_user.id != order.buyer_id %}r Peer{% endif %})</span>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <img src="{{ url_for('static', filename=order.buyer.profile_pic) }}" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <div class="fw-bold small">{{ order.buyer.name }}</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">{{ order.buyer.department }}</div>
+                            </div>
+                        </div>
+                        <div class="small text-muted"><i class="bi bi-telephone me-1"></i> {{ order.buyer.phone }}</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card bg-white border p-3 rounded-3 shadow-sm h-100">
+                        <span class="text-muted small text-uppercase fw-semibold mb-2 d-block">Seller</span>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <img src="{{ url_for('static', filename=order.seller.profile_pic) }}" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <div class="fw-bold small">{{ order.seller.name }}</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">{{ order.seller.department }}</div>
+                            </div>
+                        </div>
+                        <div class="small text-muted"><i class="bi bi-telephone me-1"></i> {{ order.seller.phone }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cancel Button for Buyer if pending -->
+            {% if current_user.id == order.buyer_id and order.status in ['request_sent', 'accepted', 'payment_pending'] %}
+                <div class="mt-4">
+                    <form method="POST" action="{{ url_for('orders.cancel_order', order_id=order.id) }}" onsubmit="return confirm('Cancel this purchase request?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-x-circle me-1"></i> Cancel Purchase Request
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right: Dynamic Actions & Handover Panel -->
+        <div class="col-lg-5">
+            <!-- 1. Seller Action: Accept / Reject Request -->
+            {% if current_user.id == order.seller_id and order.status == 'request_sent' %}
+                <div class="card card-campus border-0 shadow-sm p-4 text-center mb-4">
+                    <div class="p-3 bg-warning-subtle text-warning rounded-circle d-inline-flex mx-auto mb-2">
+                        <i class="bi bi-inbox-fill fs-3 text-dark"></i>
+                    </div>
+                    <h5 class="fw-bold">Incoming Purchase Request</h5>
+                    <p class="text-muted small mb-4">
+                        {{ order.buyer.name }} wants to buy your item for <strong>₹{{ "{:,.0f}".format(order.listing.price) }}</strong> via {{ order.payment_method|upper }}.
+                    </p>
+
+                    <div class="d-flex gap-2">
+                        <form method="POST" action="{{ url_for('orders.accept_request', order_id=order.id) }}" class="flex-grow-1">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-campus w-100 fw-bold">
+                                <i class="bi bi-check-lg me-1"></i> Accept Request
+                            </button>
+                        </form>
+
+                        <form method="POST" action="{{ url_for('orders.reject_request', order_id=order.id) }}" class="flex-grow-1">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline-danger w-100 fw-bold">
+                                <i class="bi bi-x-lg me-1"></i> Decline
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- 2. Demo UPI Payment Block (Feature 9) -->
+            {% if order.payment_method == 'upi' and order.status in ['payment_pending', 'payment_completed', 'payment_confirmed'] %}
+                <div class="card card-campus border-0 shadow-sm p-4 mb-4">
+                    <!-- Demo Banner required by Feature 9 -->
+                    <div class="alert alert-warning py-2 px-3 small d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-info-circle-fill text-warning fs-5"></i>
+                        <span><strong>Demo/prototype payment flow</strong> — actual bank transactions are not verified.</span>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-qr-code text-teal" style="color: #0f766e;"></i> UPI / GPay Scan & Pay
+                    </h5>
+
+                    <!-- QR Display -->
+                    <div class="qr-card p-3 mb-3 bg-light text-center">
+                        {% if order.seller.upi_qr_image %}
+                            <img src="{{ url_for('static', filename=order.seller.upi_qr_image) }}" alt="Seller UPI QR" class="img-fluid" style="max-height: 200px;">
+                        {% elif dynamic_upi_qr %}
+                            <img src="{{ url_for('static', filename=dynamic_upi_qr) }}" alt="Dynamic UPI QR" class="img-fluid" style="max-height: 200px;">
+                        {% else %}
+                            <div class="p-4 text-center">
+                                <i class="bi bi-qr-code fs-1 text-muted"></i>
+                                <div class="small text-muted mt-2">Pay to UPI ID: <strong>{{ order.seller.upi_id or 'seller@upi' }}</strong></div>
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-2">
+                            <span class="badge bg-dark fs-6 px-3 py-1">Pay ₹{{ "{:,.0f}".format(order.payment.amount if order.payment else order.listing.price) }}</span>
+                            <div class="small text-muted mt-1">UPI ID: <strong>{{ order.seller.upi_id or 'seller@upi' }}</strong> ({{ order.seller.name }})</div>
+                        </div>
+                    </div>
+
+                    <!-- Buyer Form: Submit Reference ID -->
+                    {% if current_user.id == order.buyer_id and order.status == 'payment_pending' %}
+                        <form method="POST" action="{{ url_for('orders.submit_payment', order_id=order.id) }}" enctype="multipart/form-data">
+                            {{ payment_form.hidden_tag() }}
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Enter UPI Transaction / UTR Reference ID *</label>
+                                {{ payment_form.transaction_reference(class="form-control font-monospace", placeholder="e.g. 12984533019 or UPI/98342177421") }}
+                            </div>
+                            <button type="submit" class="btn btn-campus w-100 fw-bold py-2">
+                                <i class="bi bi-check2-circle me-1"></i> I Have Completed Payment
+                            </button>
+                        </form>
+                    {% elif order.status == 'payment_completed' %}
+                        <!-- Buyer Waiting / Seller Reviewing State -->
+                        <div class="p-3 bg-light rounded-3 border mb-3">
+                            <div class="fw-bold small text-dark mb-1">Submitted Reference ID:</div>
+                            <div class="font-monospace text-primary fw-semibold">{{ order.payment.transaction_reference }}</div>
+                            <small class="text-muted">Awaiting confirmation from seller.</small>
+                        </div>
+
+                        <!-- Seller Actions for Confirming Payment -->
+                        {% if current_user.id == order.seller_id %}
+                            <div class="d-flex gap-2">
+                                <form method="POST" action="{{ url_for('orders.confirm_payment', order_id=order.id) }}" class="flex-grow-1">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-success w-100 fw-bold">
+                                        <i class="bi bi-check-lg me-1"></i> Confirm Payment Received
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('orders.reject_payment', order_id=order.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        Payment Not Received
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- 3. QR Handover Block (Feature 10) -->
+            {% if order.status in ['handover_pending', 'completed'] and order.handover %}
+                <div class="card card-campus border-0 shadow-sm p-4 mb-4">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check text-success fs-4"></i> Campus Handover Verification
+                    </h5>
+
+                    {% if order.status == 'handover_pending' %}
+                        {% if current_user.id == order.buyer_id %}
+                            <!-- Buyer view: Show Handover QR -->
+                            <div class="text-center">
+                                <p class="small text-muted mb-3">
+                                    Show this single-use security QR code to <strong>{{ order.seller.name }}</strong> during your physical campus handover.
+                                </p>
+                                <div class="qr-card p-3 mb-3 bg-light">
+                                    <img src="{{ url_for('static', filename=order.handover.qr_image_path) }}" alt="Handover QR" class="img-fluid" style="max-height: 230px;">
+                                    <div class="mt-2 small text-muted font-monospace">Security Code: <strong>{{ order.handover.token }}</strong></div>
+                                </div>
+                                <span class="badge bg-warning-subtle text-warning border px-3 py-2 text-dark">
+                                    <i class="bi bi-hourglass-split me-1"></i> Ready for Seller Verification Scan
+                                </span>
+                            </div>
+                        {% elif current_user.id == order.seller_id %}
+                            <!-- Seller view: Link to scan or manual enter code -->
+                            <div class="text-center p-3 bg-light rounded-3">
+                                <i class="bi bi-camera-fill fs-1 text-teal d-block mb-2" style="color: #0f766e;"></i>
+                                <h6 class="fw-bold">Ready to Hand Over Item?</h6>
+                                <p class="small text-muted mb-3">
+                                    Meet {{ order.buyer.name }} on campus, check the item, and scan the buyer's screen QR code to complete the transaction.
+                                </p>
+                                <a href="{{ url_for('orders.verify_handover', order_id=order.id) }}" class="btn btn-campus w-100 py-2 fw-bold">
+                                    <i class="bi bi-qr-code-scan me-1"></i> Scan or Enter Handover Code
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% elif order.status == 'completed' %}
+                        <!-- Completed Verification Banner -->
+                        <div class="alert alert-success p-3 rounded-3 text-center mb-0">
+                            <i class="bi bi-check-circle-fill fs-2 text-success d-block mb-1"></i>
+                            <h6 class="fw-bold mb-1">Handover Verified Successfully!</h6>
+                            <p class="small text-muted mb-2">Item handover was securely verified via QR code and this item has been marked as Sold.</p>
+                            
+                            <!-- Rating Action -->
+                            {% if not existing_review %}
+                                <a href="{{ url_for('orders.review', order_id=order.id) }}" class="btn btn-success btn-sm px-3 mt-1 fw-bold">
+                                    <i class="bi bi-star-fill me-1"></i> Rate & Review {{ order.seller.name if current_user.id == order.buyer_id else order.buyer.name }}
+                                </a>
+                            {% else %}
+                                <span class="badge bg-light text-dark border small mt-2">
+                                    <i class="bi bi-star-fill text-warning me-1"></i> You rated this transaction {{ existing_review.rating }}/5 stars
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

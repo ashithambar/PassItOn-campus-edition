@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}My Purchases – PassItOn{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1">My Campus Purchases</h3>
+            <p class="text-muted small mb-0">Track items you have requested, paid for, or received</p>
+        </div>
+        <a href="{{ url_for('listings.index') }}" class="btn btn-campus btn-sm">
+            <i class="bi bi-search me-1"></i> Browse More Items
+        </a>
+    </div>
+
+    {% if orders %}
+        <div class="table-responsive bg-white rounded-3 border shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-muted text-uppercase">
+                    <tr>
+                        <th>Order</th>
+                        <th>Item</th>
+                        <th>Seller</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary-subtle text-secondary font-monospace">{{ order.order_number }}</span>
+                                <div class="text-muted" style="font-size: 0.7rem;">{{ order.created_at.strftime('%d %b, %I:%M %p') }}</div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ url_for('static', filename=order.listing.primary_image) }}" class="rounded border" style="width: 44px; height: 44px; object-fit: cover;">
+                                    <div>
+                                        <div class="fw-bold small">
+                                            <a href="{{ url_for('listings.detail', listing_id=order.listing.id) }}" class="text-decoration-none text-dark">
+                                                {{ order.listing.title }}
+                                            </a>
+                                        </div>
+                                        <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ order.listing.location }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold small">{{ order.seller.name }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ order.seller.department }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-telephone me-1"></i>{{ order.seller.phone }}</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(order.listing.price) }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border small text-uppercase">{{ order.payment_method }}</span>
+                                {% if order.payment and order.payment.status %}
+                                    <div class="text-muted" style="font-size: 0.7rem;">{{ order.payment.status|capitalize }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if order.status == 'completed' %}bg-success
+                                    {% elif order.status in ['rejected', 'cancelled'] %}bg-danger
+                                    {% elif order.status == 'handover_pending' %}bg-primary
+                                    {% elif order.status == 'payment_completed' %}bg-info text-dark
+                                    {% else %}bg-warning text-dark{% endif %}">
+                                    {{ order.status|replace('_', ' ')|capitalize }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    {% if order.status == 'handover_pending' %}
+                                        <a href="{{ url_for('orders.detail', order_id=order.id) }}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-qr-code me-1"></i> Show QR
+                                        </a>
+                                    {% elif order.status == 'completed' and not order.reviews.filter_by(reviewer_id=current_user.id).first() %}
+                                        <a href="{{ url_for('orders.review', order_id=order.id) }}" class="btn btn-sm btn-success">
+                                            <i class="bi bi-star-fill me-1"></i> Review
+                                        </a>
+                                    {% endif %}
+                                    <a href="{{ url_for('orders.detail', order_id=order.id) }}" class="btn btn-sm btn-outline-secondary">
+                                        Track Order
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state bg-white rounded-4 border p-5 shadow-sm text-center">
+            <div class="empty-state-icon"><i class="bi bi-bag"></i></div>
+            <h5>You haven't requested any campus items yet.</h5>
+            <p class="text-muted small">Find discounted textbooks, calculators, and lab supplies from students.</p>
+            <a href="{{ url_for('listings.index') }}" class="btn btn-campus">Browse All Campus Items</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

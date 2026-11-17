@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Campus Safety Guidelines – PassItOn{% endblock %}
+
+{% block content %}
+<div class="max-w-900 mx-auto py-3">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill fw-bold text-uppercase small">Trust & Security</span>
+        <h2 class="display-6 fw-bold mt-2">Campus Community Safety Guidelines</h2>
+        <p class="text-muted">PassItOn is designed to keep campus commerce transparent, accountable, and safe for all students.</p>
+    </div>
+
+    <!-- Main Safety Points Grid -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card card-campus h-100 p-4 border-start border-4 border-primary">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-2 bg-primary-subtle text-primary rounded-circle">
+                        <i class="bi bi-geo-alt-fill fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">1. Safe Campus Meetup Spots</h5>
+                </div>
+                <p class="text-muted small">
+                    Always arrange in-person item handovers in public, well-lit campus zones during normal daylight or operating hours.
+                </p>
+                <ul class="small text-muted ps-3 mb-0">
+                    <li>Campus Central Library lobby or porch</li>
+                    <li>Student Center / Campus Cafeteria</li>
+                    <li>Department Academic Block foyers</li>
+                    <li>Hostel Security Checkpoints</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card card-campus h-100 p-4 border-start border-4 border-success">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-2 bg-success-subtle text-success rounded-circle">
+                        <i class="bi bi-search fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">2. Inspect Before Final Payment</h5>
+                </div>
+                <p class="text-muted small">
+                    Always thoroughly test and verify physical condition of items prior to paying:
+                </p>
+                <ul class="small text-muted ps-3 mb-0">
+                    <li>Calculators: test all keypads, battery compartments, and matrix/calculus functions</li>
+                    <li>Electronics: plug into a wall outlet or power bank to check display and ports</li>
+                    <li>Books: check for missing pages, heavy water damage, or binding issues</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card card-campus h-100 p-4 border-start border-4 border-warning">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-2 bg-warning-subtle text-warning rounded-circle">
+                        <i class="bi bi-qr-code-scan fs-3 text-dark"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">3. Verify with Handover QR Code</h5>
+                </div>
+                <p class="text-muted small">
+                    Always use the platform's QR Handover verification step.
+                </p>
+                <ul class="small text-muted ps-3 mb-0">
+                    <li>The buyer receives a unique encrypted Handover QR code after payment</li>
+                    <li>The seller scans it with their phone camera or types the security code</li>
+                    <li>This officially completes the transaction and marks the item Sold</li>
+                    <li>Prevents double-selling and provides an audit trail for both students</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card card-campus h-100 p-4 border-start border-4 border-danger">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-2 bg-danger-subtle text-danger rounded-circle">
+                        <i class="bi bi-shield-slash fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">4. Report Suspicious Activity</h5>
+                </div>
+                <p class="text-muted small">
+                    Our campus administrators actively monitor and moderate the platform:
+                </p>
+                <ul class="small text-muted ps-3 mb-0">
+                    <li>Click the <strong>"Report"</strong> button on any suspicious listing or student profile</li>
+                    <li>Never share your email passwords, ATM PINs, or bank OTPs</li>
+                    <li>Report students asking to meet off-campus in secluded areas</li>
+                    <li>Campus moderators can instantly suspend non-compliant accounts</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Action -->
+    <div class="text-center p-4 bg-light rounded-4 border">
+        <h5 class="fw-bold mb-2">Notice any violation of campus regulations?</h5>
+        <p class="text-muted small mb-3">You can report inappropriate listings or users directly from their respective item and profile pages.</p>
+        <a href="{{ url_for('listings.index') }}" class="btn btn-campus">Browse Campus Items Safely</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}PassItOn – Campus Edition{% endblock %}</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Campus Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Campus Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-campus sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
+                <div class="brand-badge d-flex align-items-center gap-1">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>PassItOn</span>
+                </div>
+                <div>
+                    <span class="fw-bold text-dark d-none d-sm-inline" style="font-size: 1.05rem;">Campus Edition</span>
+                    <span class="brand-tagline d-none d-md-block">Student-to-Student Marketplace</span>
+                </div>
+            </a>
+
+            <!-- Mobile toggler -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Search Quick Nav -->
+                <form class="d-flex mx-auto my-2 my-lg-0 col-12 col-lg-5" action="{{ url_for('listings.index') }}" method="GET">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input class="form-control bg-light border-start-0 border-end-0 ps-0" type="search" name="q" placeholder="Search books, calculators, lab coats..." value="{{ request.args.get('q', '') }}">
+                        <button class="btn btn-outline-secondary border-start-0 bg-light text-muted" type="submit">Search</button>
+                    </div>
+                </form>
+
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-1 gap-lg-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('listings.index') }}"><i class="bi bi-grid-fill me-1"></i> Browse</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.safety') }}"><i class="bi bi-shield-check me-1"></i> Safety</a>
+                    </li>
+
+                    {% if current_user.is_authenticated %}
+                        <!-- Sell Item Button -->
+                        <li class="nav-item my-1 my-lg-0">
+                            <a class="btn btn-campus btn-sm d-flex align-items-center gap-1" href="{{ url_for('listings.create') }}">
+                                <i class="bi bi-plus-circle-fill"></i> Sell an Item
+                            </a>
+                        </li>
+
+                        <!-- Chat Icon with live badge -->
+                        <li class="nav-item">
+                            <a class="nav-link position-relative px-2" href="{{ url_for('chat.index') }}" title="Campus Messages">
+                                <i class="bi bi-chat-dots fs-5"></i>
+                                {% if unread_messages_count > 0 %}
+                                    <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                        {{ unread_messages_count }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </li>
+
+                        <!-- Notifications Bell with Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link position-relative px-2" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell fs-5"></i>
+                                {% if unread_notifications_count > 0 %}
+                                    <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                        {{ unread_notifications_count }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" style="width: 300px; max-height: 400px; overflow-y: auto;" aria-labelledby="notifDropdown">
+                                <li class="d-flex justify-content-between align-items-center px-2 py-1 border-bottom">
+                                    <span class="fw-bold small">Campus Notifications</span>
+                                    <a href="{{ url_for('dashboard.notifications') }}" class="small text-decoration-none">View All</a>
+                                </li>
+                                {% if current_user.notifications.filter_by(is_read=False).count() > 0 %}
+                                    {% for n in current_user.notifications.filter_by(is_read=False).limit(4).all() %}
+                                        <li>
+                                            <a class="dropdown-item py-2 px-2 border-bottom" href="{{ n.link or url_for('dashboard.notifications') }}">
+                                                <div class="fw-semibold small text-truncate">{{ n.title }}</div>
+                                                <div class="text-muted small text-truncate" style="font-size: 0.75rem;">{{ n.message }}</div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li class="p-3 text-center text-muted small">No new notifications</li>
+                                {% endif %}
+                            </ul>
+                        </li>
+
+                        <!-- User Profile Dropdown -->
+                        <li class="nav-item dropdown ms-lg-2">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 border rounded-pill pe-3 bg-light" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <img src="{{ url_for('static', filename=current_user.profile_pic) }}" alt="{{ current_user.name }}" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;">
+                                <span class="fw-semibold small text-truncate" style="max-width: 100px;">{{ current_user.name.split()[0] }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="fw-bold small">{{ current_user.name }}</div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">{{ current_user.department }}</div>
+                                    <span class="badge bg-light text-dark border mt-1">{{ current_user.college }}</span>
+                                </li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.index') }}"><i class="bi bi-speedometer2 me-2 text-primary"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('auth.profile') }}"><i class="bi bi-person me-2 text-primary"></i> My Profile</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.my_listings') }}"><i class="bi bi-tag me-2 text-success"></i> My Listings</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.requests_received') }}"><i class="bi bi-inbox me-2 text-info"></i> Requests Received</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.my_purchases') }}"><i class="bi bi-bag-check me-2 text-warning"></i> My Purchases</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.wishlist') }}"><i class="bi bi-heart me-2 text-danger"></i> Wishlist</a></li>
+                                
+                                {% if current_user.is_admin %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 fw-semibold text-danger" href="{{ url_for('admin.index') }}"><i class="bi bi-shield-lock-fill me-2"></i> Admin Panel</a></li>
+                                {% endif %}
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i> Log Out</a></li>
+                            </ul>
+                        </li>
+
+                    {% else %}
+                        <!-- Guest Auth Buttons -->
+                        <li class="nav-item">
+                            <a class="btn btn-campus-outline btn-sm" href="{{ url_for('auth.login') }}">Sign In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-campus btn-sm" href="{{ url_for('auth.register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="py-4">
+        <div class="container">
+            <!-- Flash Message Alerts -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm d-flex align-items-center gap-2" role="alert">
+                                {% if category == 'success' %}
+                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                {% elif category == 'danger' or category == 'error' %}
+                                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="bi bi-exclamation-circle-fill fs-5"></i>
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill fs-5"></i>
+                                {% endif %}
+                                <div class="flex-grow-1">{{ message }}</div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-campus">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-badge d-flex align-items-center gap-1">
+                            <i class="bi bi-mortarboard-fill"></i>
+                            <span>PassItOn</span>
+                        </div>
+                        <span class="fw-bold text-white fs-5">Campus Edition</span>
+                    </div>
+                    <p class="text-secondary small">
+                        "One student's unused item becomes another student's useful item."
+                    </p>
+                    <p class="text-secondary small">
+                        A safe, sustainable, verified student-to-student marketplace designed specifically for college campuses.
+                    </p>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Explore</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a href="{{ url_for('listings.index') }}">All Items</a></li>
+                        <li><a href="{{ url_for('listings.index', category='books') }}">Textbooks & Notes</a></li>
+                        <li><a href="{{ url_for('listings.index', category='calculators') }}">Calculators</a></li>
+                        <li><a href="{{ url_for('listings.index', category='lab-equipment') }}">Lab Equipment</a></li>
+                        <li><a href="{{ url_for('listings.create') }}">Sell an Item</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Campus Safety & Trust</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a href="{{ url_for('main.safety') }}"><i class="bi bi-shield-check text-success me-1"></i> Campus Safety Guide</a></li>
+                        <li><a href="{{ url_for('main.safety') }}"><i class="bi bi-qr-code-scan text-info me-1"></i> QR Handover Process</a></li>
+                        <li><a href="{{ url_for('main.safety') }}"><i class="bi bi-building text-warning me-1"></i> Recommended Meetup Spots</a></li>
+                        <li><a href="{{ url_for('main.about') }}"><i class="bi bi-info-circle me-1"></i> About This Project</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Project Specs</h6>
+                    <div class="card bg-dark border-secondary p-3 text-secondary small">
+                        <div class="fw-semibold text-white mb-1">PassItOn – College Mini-Project</div>
+                        <div>Python Flask • SQLite • Flask-Login</div>
+                        <div>QR Generation & Camera Scan</div>
+                        <div>Demo UPI / GPay Flow</div>
+                        <div class="mt-2 text-warning fw-semibold">Local Run: 127.0.0.1:5000</div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary my-4">
+
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-secondary">
+                <div>© 2026 PassItOn – Campus Edition. Built for college students.</div>
+                <div>Demo/Prototype platform • Safe campus transactions only</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Main JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

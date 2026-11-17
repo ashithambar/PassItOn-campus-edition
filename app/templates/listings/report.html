@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Report Listing – {{ listing.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="card card-campus border-0 shadow-sm p-4">
+            <div class="text-center mb-4">
+                <div class="p-3 bg-danger-subtle text-danger rounded-circle d-inline-flex mb-2">
+                    <i class="bi bi-shield-exclamation fs-3"></i>
+                </div>
+                <h4 class="fw-bold">Report Listing</h4>
+                <p class="text-muted small">Reporting: <strong>"{{ listing.title }}"</strong> (₹{{ "{:,.0f}".format(listing.price) }})</p>
+            </div>
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Reason for Report</label>
+                    {{ form.reason(class="form-select" + (" is-invalid" if form.reason.errors else "")) }}
+                    {% for error in form.reason.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Explanation / Details</label>
+                    {{ form.comment(class="form-control" + (" is-invalid" if form.comment.errors else ""), rows=4, placeholder="Describe why this listing violates campus guidelines (e.g. fake price, broken item sold as new, off-campus scam attempt)...") }}
+                    {% for error in form.comment.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                </div>
+
+                <div class="alert alert-light border small text-muted">
+                    <i class="bi bi-info-circle me-1 text-primary"></i> Campus administrators investigate all reported listings and remove offensive or misleading content promptly.
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('listings.detail', listing_id=listing.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-danger fw-semibold">
+                        <i class="bi bi-send-fill me-1"></i> Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

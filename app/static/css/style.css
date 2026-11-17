@@ -1,0 +1,494 @@
+/* ==========================================================================
+   PassItOn – Campus Edition: Custom Stylesheet
+   Theme: College-focused, vibrant, trustworthy, modern UI
+   ========================================================================== */
+
+:root {
+  --campus-primary: #0f766e;
+  --campus-primary-hover: #115e59;
+  --campus-primary-light: #ccfbf1;
+  --campus-secondary: #312e81;
+  --campus-accent: #f59e0b;
+  --campus-accent-dark: #d97706;
+  --campus-dark: #0f172a;
+  --campus-gray: #64748b;
+  --campus-light-gray: #f8fafc;
+  --campus-border: #e2e8f0;
+  --campus-card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --campus-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--campus-light-gray);
+  color: #1e293b;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+/* Navbar */
+.navbar-campus {
+  background: #ffffff;
+  border-bottom: 2px solid var(--campus-border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.brand-badge {
+  background: linear-gradient(135deg, var(--campus-primary), #0284c7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.brand-tagline {
+  font-size: 0.75rem;
+  color: var(--campus-gray);
+  display: block;
+}
+
+.nav-link {
+  font-weight: 500;
+  color: #334155 !important;
+  transition: color 0.15s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--campus-primary) !important;
+}
+
+.btn-campus {
+  background-color: var(--campus-primary);
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  padding: 8px 18px;
+  transition: all 0.2s;
+}
+
+.btn-campus:hover {
+  background-color: var(--campus-primary-hover);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25);
+}
+
+.btn-campus-outline {
+  border: 1.5px solid var(--campus-primary);
+  color: var(--campus-primary);
+  background: transparent;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 7px 16px;
+  transition: all 0.2s;
+}
+
+.btn-campus-outline:hover {
+  background-color: var(--campus-primary);
+  color: white;
+}
+
+.btn-campus-accent {
+  background-color: var(--campus-accent);
+  color: #78350f;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  padding: 8px 18px;
+  transition: all 0.2s;
+}
+
+.btn-campus-accent:hover {
+  background-color: var(--campus-accent-dark);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Hero Section */
+.hero-banner {
+  background: linear-gradient(135deg, #0f766e 0%, #1e1b4b 100%);
+  color: white;
+  border-radius: 20px;
+  padding: 48px 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(15, 118, 110, 0.3);
+}
+
+.hero-banner::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Cards */
+.card-campus {
+  background: white;
+  border: 1px solid var(--campus-border);
+  border-radius: 14px;
+  box-shadow: var(--campus-card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.card-campus:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--campus-card-hover);
+}
+
+.card-img-wrapper {
+  position: relative;
+  height: 200px;
+  background-color: #f1f5f9;
+  overflow: hidden;
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card-campus:hover .card-img-wrapper img {
+  transform: scale(1.04);
+}
+
+.wishlist-btn-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+  z-index: 2;
+}
+
+.wishlist-btn-overlay:hover, .wishlist-btn-overlay.active {
+  color: #e11d48;
+  transform: scale(1.1);
+}
+
+/* Badges */
+.badge-condition-new {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.badge-condition-likenew {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.badge-condition-good {
+  background-color: #ede9fe;
+  color: #6d28d9;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.badge-condition-used {
+  background-color: #fef3c7;
+  color: #b45309;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.badge-status-available {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-status-reserved {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.badge-status-sold {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+/* Category Pill Card */
+.category-card {
+  background: white;
+  border: 1px solid var(--campus-border);
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  text-decoration: none;
+  color: #1e293b;
+  transition: all 0.2s;
+  display: block;
+}
+
+.category-card:hover {
+  border-color: var(--campus-primary);
+  background-color: #f0fdfa;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.12);
+  color: var(--campus-primary);
+}
+
+.category-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: var(--campus-primary-light);
+  color: var(--campus-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin: 0 auto 10px auto;
+}
+
+/* Smart Price Suggestion Box */
+.smart-price-box {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
+  border: 1.5px dashed var(--campus-primary);
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+
+.smart-price-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--campus-primary);
+}
+
+/* Order Progress Timeline */
+.timeline-wrapper {
+  position: relative;
+  padding: 20px 0;
+}
+
+.timeline-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.timeline-steps::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: 4px;
+  background-color: #e2e8f0;
+  z-index: 1;
+}
+
+.timeline-step {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  flex: 1;
+}
+
+.timeline-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid #cbd5e1;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin: 0 auto 8px auto;
+  transition: all 0.3s;
+}
+
+.timeline-step.completed .timeline-icon {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: white;
+}
+
+.timeline-step.active .timeline-icon {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+}
+
+.timeline-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.timeline-step.completed .timeline-title,
+.timeline-step.active .timeline-title {
+  color: #0f172a;
+}
+
+/* Chat Styles */
+.chat-container {
+  height: 600px;
+  display: flex;
+  background: white;
+  border-radius: 14px;
+  border: 1px solid var(--campus-border);
+  overflow: hidden;
+}
+
+.chat-sidebar {
+  width: 320px;
+  border-right: 1px solid var(--campus-border);
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.chat-item {
+  padding: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.chat-item:hover, .chat-item.active {
+  background: #f1f5f9;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-bubble {
+  max-width: 70%;
+  padding: 10px 16px;
+  border-radius: 14px;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.chat-bubble.mine {
+  align-self: flex-end;
+  background-color: var(--campus-primary);
+  color: white;
+  border-bottom-right-radius: 3px;
+}
+
+.chat-bubble.other {
+  align-self: flex-start;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-bottom-left-radius: 3px;
+}
+
+.chat-bubble-time {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+}
+
+.empty-state-icon {
+  font-size: 3.5rem;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+/* QR Code Box */
+.qr-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.qr-card img {
+  max-width: 260px;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  padding: 8px;
+  background: white;
+}
+
+/* Footer */
+.footer-campus {
+  background: #0f172a;
+  color: #cbd5e1;
+  padding: 48px 0 24px 0;
+  border-top: 4px solid var(--campus-primary);
+  margin-top: auto;
+}
+
+.footer-campus a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-campus a:hover {
+  color: #ffffff;
+}

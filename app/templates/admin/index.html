@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard – PassItOn{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js CDN for Admin Analytics (Feature 14) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <!-- Admin Sub-Navigation Header -->
+    <div class="card card-campus border-0 shadow-sm p-3 mb-4 bg-dark text-white">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-danger px-3 py-2 fs-6"><i class="bi bi-shield-lock-fill me-1"></i> Admin Console</span>
+                <div>
+                    <h5 class="fw-bold mb-0 text-white">PassItOn Campus Administration</h5>
+                    <small class="text-white-50">Apex Institute of Technology Community Oversight</small>
+                </div>
+            </div>
+
+            <!-- Admin Tabs -->
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('admin.index') }}" class="btn btn-sm btn-light fw-semibold">
+                    <i class="bi bi-speedometer2 me-1"></i> Overview
+                </a>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-people-fill me-1"></i> Users
+                </a>
+                <a href="{{ url_for('admin.listings') }}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-tag-fill me-1"></i> Listings
+                </a>
+                <a href="{{ url_for('admin.transactions') }}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-receipt me-1"></i> Transactions
+                </a>
+                <a href="{{ url_for('admin.categories') }}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-grid-fill me-1"></i> Categories
+                </a>
+                <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-outline-light position-relative">
+                    <i class="bi bi-flag-fill me-1"></i> Reports
+                    {% if pending_reports > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                            {{ pending_reports }}
+                        </span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards (Feature 14 Requirement) -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 mb-4">
+        <div class="col">
+            <div class="card card-campus border-0 shadow-sm p-3 text-center">
+                <div class="fs-4 fw-bold text-teal" style="color: #0f766e;">{{ total_users }}</div>
+                <div class="small text-muted fw-semibold">Total Students</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-campus border-0 shadow-sm p-3 text-center">
+                <div class="fs-4 fw-bold text-primary">{{ total_listings }}</div>
+                <div class="small text-muted fw-semibold">Total Listings</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-campus border-0 shadow-sm p-3 text-center">
+                <div class="fs-4 fw-bold text-info text-dark">{{ active_listings }}</div>
+                <div class="small text-muted fw-semibold">Active Listings</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-campus border-0 shadow-sm p-3 text-center">
+                <div class="fs-4 fw-bold text-success">{{ sold_listings }}</div>
+                <div class="small text-muted fw-semibold">Items Sold</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-campus border-0 shadow-sm p-3 text-center">
+                <div class="fs-4 fw-bold text-warning text-dark">₹{{ "{:,.0f}".format(total_volume) }}</div>
+                <div class="small text-muted fw-semibold">Demo Volume</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card card-campus border-0 shadow-sm p-3 text-center">
+                <div class="fs-4 fw-bold text-danger">{{ pending_reports }}</div>
+                <div class="small text-muted fw-semibold">Pending Reports</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Analytics Charts (Feature 14 Requirement) -->
+    <div class="row g-4 mb-4">
+        <!-- Chart 1: Categories Breakdown -->
+        <div class="col-lg-6">
+            <div class="card card-campus border-0 shadow-sm p-4 h-100">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-pie-chart-fill text-teal me-2" style="color: #0f766e;"></i> Listings per Campus Category</h6>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="chart-categories"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Order Status Distribution -->
+        <div class="col-lg-6">
+            <div class="card card-campus border-0 shadow-sm p-4 h-100">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i> Campus Transactions & Order Statuses</h6>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="chart-orders"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Platform Activity & Pending Reports -->
+    <div class="row g-4">
+        <!-- Recent Orders Audit -->
+        <div class="col-lg-7">
+            <div class="card card-campus border-0 shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h6 class="fw-bold mb-0">Recent Campus Orders</h6>
+                    <a href="{{ url_for('admin.transactions') }}" class="small text-decoration-none">View All Transactions</a>
+                </div>
+
+                {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Item</th>
+                                    <th>Buyer & Seller</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for o in recent_orders %}
+                                    <tr>
+                                        <td class="font-monospace fw-bold">{{ o.order_number }}</td>
+                                        <td class="text-truncate" style="max-width: 140px;">{{ o.listing.title }}</td>
+                                        <td>{{ o.buyer.name.split()[0] }} → {{ o.seller.name.split()[0] }}</td>
+                                        <td class="fw-bold">₹{{ "{:,.0f}".format(o.listing.price) }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if o.status == 'completed' %}bg-success
+                                                {% elif o.status in ['rejected', 'cancelled'] %}bg-danger
+                                                {% elif o.status == 'handover_pending' %}bg-primary
+                                                {% else %}bg-warning text-dark{% endif %}" style="font-size: 0.65rem;">
+                                                {{ o.status|capitalize }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-3 text-muted small">No transactions recorded yet.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pending Moderation Reports -->
+        <div class="col-lg-5">
+            <div class="card card-campus border-0 shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-flag-fill text-danger me-1"></i> Pending Reports</h6>
+                    <a href="{{ url_for('admin.reports') }}" class="small text-decoration-none">Manage Reports</a>
+                </div>
+
+                {% if recent_reports %}
+                    <div class="list-group list-group-flush">
+                        {% for rep in recent_reports %}
+                            <div class="list-group-item px-0 py-2 small">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-danger-subtle text-danger">{{ rep.reason|upper }}</span>
+                                    <span class="text-muted" style="font-size: 0.7rem;">{{ rep.created_at.strftime('%d %b') }}</span>
+                                </div>
+                                <div class="fw-semibold text-dark mt-1">
+                                    {% if rep.reported_listing %}
+                                        Item: "{{ rep.reported_listing.title }}"
+                                    {% elif rep.reported_user %}
+                                        User: {{ rep.reported_user.name }}
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted text-truncate" style="font-size: 0.75rem;">{{ rep.comment }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
+                        No pending reports. Campus community is running smoothly!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_charts.js') }}"></script>
+{% endblock %}

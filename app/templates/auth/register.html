@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Create Student Account – PassItOn{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-7">
+        <div class="card card-campus border-0 shadow-sm p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="brand-badge d-inline-flex align-items-center gap-1 mb-2 px-3 py-1">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>PassItOn</span>
+                </div>
+                <h3 class="fw-bold">Create Student Account</h3>
+                <p class="text-muted small">Join the campus marketplace to buy, sell, and reuse items safely</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                {{ form.hidden_tag() }}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="name">Full Name</label>
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Rahul Sharma") }}
+                        {% for error in form.name.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="email">Campus / Personal Email</label>
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="student@campus.edu") }}
+                        {% for error in form.email.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="password">Password</label>
+                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="At least 6 characters") }}
+                        {% for error in form.password.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="confirm_password">Confirm Password</label>
+                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Re-type password") }}
+                        {% for error in form.confirm_password.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="phone">Phone / WhatsApp Number</label>
+                        {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="10-digit mobile number") }}
+                        {% for error in form.phone.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="college">College / Institute Name</label>
+                        {{ form.college(class="form-control" + (" is-invalid" if form.college.errors else ""), placeholder="e.g. Apex Institute of Technology") }}
+                        {% for error in form.college.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="department">Department / Branch</label>
+                        {{ form.department(class="form-select" + (" is-invalid" if form.department.errors else "")) }}
+                        {% for error in form.department.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold" for="year_semester">Year / Semester</label>
+                        {{ form.year_semester(class="form-select" + (" is-invalid" if form.year_semester.errors else "")) }}
+                        {% for error in form.year_semester.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="terms" required checked>
+                    <label class="form-check-label small text-muted" for="terms">
+                        I agree to abide by campus safety rules and only conduct physical handovers in safe campus locations.
+                    </label>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-campus w-100 py-2 fw-semibold">
+                        <i class="bi bi-person-plus-fill me-1"></i> Complete Registration
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3 pt-3 border-top">
+                <p class="small text-muted mb-0">
+                    Already registered? <a href="{{ url_for('auth.login') }}" class="fw-semibold text-decoration-none" style="color: #0f766e;">Sign In here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

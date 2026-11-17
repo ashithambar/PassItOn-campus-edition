@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Reports – Campus Admin{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-flag-fill text-danger me-2"></i> Safety & Moderation Reports</h3>
+            <p class="text-muted small mb-0">Review reports submitted by campus students regarding listings or users</p>
+        </div>
+        <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Admin Home
+        </a>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="d-flex gap-2 mb-4">
+        <a href="{{ url_for('admin.reports', status='all') }}" class="btn btn-sm {% if current_status == 'all' %}btn-dark{% else %}btn-outline-secondary{% endif %}">All Reports</a>
+        <a href="{{ url_for('admin.reports', status='pending') }}" class="btn btn-sm {% if current_status == 'pending' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Pending</a>
+        <a href="{{ url_for('admin.reports', status='resolved') }}" class="btn btn-sm {% if current_status == 'resolved' %}btn-success{% else %}btn-outline-secondary{% endif %}">Resolved</a>
+        <a href="{{ url_for('admin.reports', status='dismissed') }}" class="btn btn-sm {% if current_status == 'dismissed' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Dismissed</a>
+    </div>
+
+    {% if reports %}
+        <div class="d-flex flex-column gap-3">
+            {% for rep in reports %}
+                <div class="card card-campus border-0 shadow-sm p-4 {% if rep.status == 'pending' %}border-start border-4 border-danger{% endif %}">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-2">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-danger-subtle text-danger text-uppercase fw-bold">{{ rep.reason|replace('_', ' ') }}</span>
+                                <span class="badge {% if rep.status == 'pending' %}bg-warning text-dark{% elif rep.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ rep.status|capitalize }}
+                                </span>
+                                <small class="text-muted">Report #{{ rep.id }} • {{ rep.created_at.strftime('%d %B %Y at %I:%M %p') }}</small>
+                            </div>
+                            <h6 class="fw-bold mb-1">
+                                Reported by: <strong>{{ rep.reporter.name }}</strong> ({{ rep.reporter.department }})
+                            </h6>
+                        </div>
+
+                        <!-- Target details -->
+                        <div class="text-md-end">
+                            {% if rep.reported_listing %}
+                                <span class="badge bg-light text-dark border p-2">
+                                    <i class="bi bi-tag-fill me-1 text-teal"></i> Listing: 
+                                    <a href="{{ url_for('listings.detail', listing_id=rep.reported_listing.id) }}" target="_blank" class="fw-bold text-decoration-none text-dark">
+                                        {{ rep.reported_listing.title }}
+                                    </a>
+                                </span>
+                            {% elif rep.reported_user %}
+                                <span class="badge bg-light text-dark border p-2">
+                                    <i class="bi bi-person-fill me-1 text-primary"></i> Student: 
+                                    <a href="{{ url_for('auth.view_user', user_id=rep.reported_user.id) }}" target="_blank" class="fw-bold text-decoration-none text-dark">
+                                        {{ rep.reported_user.name }}
+                                    </a>
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 my-2 small">
+                        <strong>Student's Report Description:</strong>
+                        <p class="mb-0 text-secondary mt-1">"{{ rep.comment }}"</p>
+                    </div>
+
+                    {% if rep.admin_notes %}
+                        <div class="small text-muted mb-3">
+                            <strong>Admin Resolution Notes:</strong> {{ rep.admin_notes }}
+                        </div>
+                    {% endif %}
+
+                    {% if rep.status == 'pending' %}
+                        <div class="mt-3 pt-2 border-top">
+                            <form method="POST" action="{{ url_for('admin.resolve_report', report_id=rep.id) }}" class="d-flex flex-wrap align-items-center gap-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="text" name="admin_notes" class="form-control form-control-sm flex-grow-1" placeholder="Add resolution note (e.g. Warning issued, listing edited, verified false alarm)..." required>
+                                
+                                <button type="submit" name="action" value="resolve" class="btn btn-sm btn-success fw-semibold">
+                                    <i class="bi bi-check-lg me-1"></i> Resolve
+                                </button>
+                                <button type="submit" name="action" value="dismiss" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-x-lg me-1"></i> Dismiss
+                                </button>
+
+                                {% if rep.reported_listing and rep.reported_listing.status != 'deleted' %}
+                                    <button type="submit" formaction="{{ url_for('admin.delete_listing', listing_id=rep.reported_listing.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this listing immediately?');">
+                                        <i class="bi bi-trash"></i> Delete Listing
+                                    </button>
+                                {% endif %}
+
+                                {% if rep.reported_user and not rep.reported_user.is_blocked %}
+                                    <button type="submit" formaction="{{ url_for('admin.toggle_block_user', user_id=rep.reported_user.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Suspend this user account immediately?');">
+                                        <i class="bi bi-slash-circle"></i> Suspend User
+                                    </button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state bg-white rounded-4 border p-5 shadow-sm text-center">
+            <div class="empty-state-icon text-muted mb-3"><i class="bi bi-shield-check text-success"></i></div>
+            <h5 class="fw-bold">No reports found under this filter</h5>
+            <p class="text-muted small">No pending moderation complaints from students.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

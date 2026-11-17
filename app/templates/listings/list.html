@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Campus Items – PassItOn{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Left Column: Search & Filter Sidebar -->
+    <div class="col-lg-3">
+        <div class="card card-campus border-0 shadow-sm p-3 sticky-top" style="top: 85px; z-index: 10;">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h6 class="fw-bold mb-0"><i class="bi bi-funnel-fill text-teal me-1" style="color: #0f766e;"></i> Filters</h6>
+                <a href="{{ url_for('listings.index') }}" class="small text-danger text-decoration-none">Reset All</a>
+            </div>
+
+            <form method="GET" action="{{ url_for('listings.index') }}" id="filter-form">
+                <!-- Keyword Search -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Keyword Search</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="q" class="form-control" placeholder="Book, drafter, Arduino..." value="{{ query_text }}">
+                        <button class="btn btn-campus btn-sm" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Category</label>
+                    <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.slug }}" {% if selected_category and selected_category.slug == cat.slug %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Condition -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Item Condition</label>
+                    <select name="condition" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Any Condition</option>
+                        <option value="New" {% if current_condition == 'New' %}selected{% endif %}>Brand New</option>
+                        <option value="Like New" {% if current_condition == 'Like New' %}selected{% endif %}>Like New</option>
+                        <option value="Good" {% if current_condition == 'Good' %}selected{% endif %}>Good</option>
+                        <option value="Used" {% if current_condition == 'Used' %}selected{% endif %}>Used</option>
+                    </select>
+                </div>
+
+                <!-- Price Range -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Price Range (₹)</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min ₹" value="{{ min_price if min_price is not none else '' }}">
+                        </div>
+                        <div class="col-6">
+                            <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max ₹" value="{{ max_price if max_price is not none else '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Seller Department</label>
+                    <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">All Departments</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept }}" {% if current_department == dept %}selected{% endif %}>{{ dept }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Campus Location Keyword -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Campus Location</label>
+                    <input type="text" name="location" class="form-control form-control-sm" placeholder="e.g. Library, Hostel 3" value="{{ current_location }}">
+                </div>
+
+                <!-- Keep Sort Hidden -->
+                <input type="hidden" name="sort" value="{{ current_sort }}">
+
+                <button type="submit" class="btn btn-campus btn-sm w-100 fw-semibold">
+                    Apply Filters
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Listings Results -->
+    <div class="col-lg-9">
+        <!-- Results Header & Sort Controls -->
+        <div class="card card-campus border-0 shadow-sm p-3 mb-4">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        {% if selected_category %}{{ selected_category.name }}{% else %}All Campus Items{% endif %}
+                    </h5>
+                    <small class="text-muted">Showing {{ pagination.total }} verified item{{ 's' if pagination.total != 1 else '' }}</small>
+                </div>
+
+                <!-- Sorting Dropdown -->
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small text-muted text-nowrap">Sort By:</span>
+                    <select class="form-select form-select-sm" style="width: auto;" onchange="location = this.value;">
+                        <option value="{{ url_for('listings.index', q=query_text, category=selected_category.slug if selected_category else '', condition=current_condition, min_price=min_price, max_price=max_price, department=current_department, location=current_location, sort='newest') }}" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+                        <option value="{{ url_for('listings.index', q=query_text, category=selected_category.slug if selected_category else '', condition=current_condition, min_price=min_price, max_price=max_price, department=current_department, location=current_location, sort='price_asc') }}" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="{{ url_for('listings.index', q=query_text, category=selected_category.slug if selected_category else '', condition=current_condition, min_price=min_price, max_price=max_price, department=current_department, location=current_location, sort='price_desc') }}" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="{{ url_for('listings.index', q=query_text, category=selected_category.slug if selected_category else '', condition=current_condition, min_price=min_price, max_price=max_price, department=current_department, location=current_location, sort='popular') }}" {% if current_sort == 'popular' %}selected{% endif %}>Most Popular</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Active Filter Badges -->
+            {% if query_text or selected_category or current_condition or min_price or max_price or current_department or current_location %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-2 border-top">
+                    <small class="text-muted fw-semibold">Active filters:</small>
+                    {% if query_text %}<span class="badge bg-light text-dark border">"{{ query_text }}"</span>{% endif %}
+                    {% if selected_category %}<span class="badge bg-light text-dark border">{{ selected_category.name }}</span>{% endif %}
+                    {% if current_condition %}<span class="badge bg-light text-dark border">{{ current_condition }}</span>{% endif %}
+                    {% if min_price or max_price %}<span class="badge bg-light text-dark border">₹{{ min_price or 0 }} - ₹{{ max_price or 'Any' }}</span>{% endif %}
+                    {% if current_department %}<span class="badge bg-light text-dark border">{{ current_department }}</span>{% endif %}
+                    {% if current_location %}<span class="badge bg-light text-dark border">{{ current_location }}</span>{% endif %}
+                    <a href="{{ url_for('listings.index') }}" class="small text-danger ms-auto text-decoration-none">Clear</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Items Grid -->
+        {% if listings %}
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 mb-4">
+                {% for item in listings %}
+                    <div class="col">
+                        <div class="card card-campus h-100">
+                            <div class="card-img-wrapper">
+                                <img src="{{ url_for('static', filename=item.primary_image) }}" alt="{{ item.title }}">
+
+                                <!-- Wishlist Toggle Button -->
+                                {% if current_user.is_authenticated %}
+                                    <button type="button" class="wishlist-btn-overlay wishlist-toggle-btn {% if item.id in user_wishlist_ids %}active{% endif %}" data-listing-id="{{ item.id }}" title="Save to Wishlist">
+                                        <i class="bi {% if item.id in user_wishlist_ids %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+                                    </button>
+                                {% endif %}
+
+                                <!-- Condition Badge -->
+                                <div class="position-absolute bottom-0 start-0 m-2">
+                                    {% if item.condition == 'New' %}
+                                        <span class="badge badge-condition-new">Brand New</span>
+                                    {% elif item.condition == 'Like New' %}
+                                        <span class="badge badge-condition-likenew">Like New</span>
+                                    {% elif item.condition == 'Good' %}
+                                        <span class="badge badge-condition-good">Good</span>
+                                    {% else %}
+                                        <span class="badge badge-condition-used">Used</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="card-body p-3 d-flex flex-column">
+                                <div class="small text-muted text-uppercase mb-1" style="font-size: 0.7rem; font-weight: 600;">
+                                    {{ item.category.name }}
+                                </div>
+                                <h6 class="card-title fw-bold mb-2">
+                                    <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="text-decoration-none text-dark stretched-link">
+                                        {{ item.title }}
+                                    </a>
+                                </h6>
+
+                                <div class="d-flex align-items-baseline gap-2 mb-2">
+                                    <span class="fs-5 fw-bold" style="color: #0f766e;">₹{{ "{:,.0f}".format(item.price) }}</span>
+                                    {% if item.original_price and item.original_price > item.price %}
+                                        <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
+                                        <span class="badge bg-danger-subtle text-danger small" style="font-size: 0.7rem;">-{{ item.discount_percent }}%</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-muted small" style="font-size: 0.78rem;">
+                                    <span class="text-truncate" style="max-width: 130px;">
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ item.location }}
+                                    </span>
+                                    <span>{{ item.created_at.strftime('%d %b') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if pagination.pages > 1 %}
+                <nav aria-label="Listings navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('listings.index', page=pagination.prev_num, q=query_text, category=selected_category.slug if selected_category else '', condition=current_condition, min_price=min_price, max_price=max_price, department=current_department, location=current_location, sort=current_sort) }}">
+                                Previous
+                            </a>
+                        </li>
+                        {% for p in pagination.iter_pages() %}
+                            {% if p %}
+                                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                                    <a class="page-link" href="{{ url_for('listings.index', page=p, q=query_text, category=selected_category.slug if selected_category else '', condition=current_condition, min_price=min_price, max_price=max_price, department=current_department, location=current_location, sort=current_sort) }}">
+                                        {{ p }}
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('listings.index', page=pagination.next_num, q=query_text, category=selected_category.slug if selected_category else '', condition=current_condition, min_price=min_price, max_price=max_price, department=current_department, location=current_location, sort=current_sort) }}">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state bg-white rounded-4 border p-5 shadow-sm">
+                <div class="empty-state-icon text-muted mb-3"><i class="bi bi-search"></i></div>
+                <h4 class="fw-bold">No Matching Campus Items Found</h4>
+                <p class="text-muted small mb-4">Try clearing some filters or searching with a broader keyword.</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{{ url_for('listings.index') }}" class="btn btn-outline-secondary">Reset Filters</a>
+                    <a href="{{ url_for('listings.create') }}" class="btn btn-campus">Sell an Item Instead</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

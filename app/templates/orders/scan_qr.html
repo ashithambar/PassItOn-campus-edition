@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Handover – Order {{ order.order_number }}{% endblock %}
+
+{% block extra_head %}
+<!-- html5-qrcode library for camera QR scanning -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-6 col-md-8">
+        <div class="card card-campus border-0 shadow-sm p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="p-3 bg-success-subtle text-success rounded-circle d-inline-flex mb-2">
+                    <i class="bi bi-qr-code-scan fs-3"></i>
+                </div>
+                <h4 class="fw-bold">Scan Buyer's Handover QR</h4>
+                <p class="text-muted small">Order: <strong>{{ order.order_number }}</strong> • Item: <strong>{{ order.listing.title }}</strong></p>
+            </div>
+
+            <!-- Camera QR Scanner Viewport -->
+            <div class="text-center mb-4">
+                <div id="qr-reader" class="rounded-3 border overflow-hidden mx-auto bg-dark" style="min-height: 280px; max-width: 380px;"></div>
+                <div id="qr-status-message" class="small mt-2 text-muted">
+                    Point your camera at the buyer's phone screen showing their Handover QR code.
+                </div>
+            </div>
+
+            <div class="text-center position-relative my-3">
+                <hr>
+                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small text-muted fw-bold">OR ENTER CODE MANUALLY</span>
+            </div>
+
+            <!-- Manual Security Code Fallback Form (Required by Feature 10) -->
+            <form method="POST" id="handover-verify-form">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold" for="token">Security Token / Code</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light font-monospace"><i class="bi bi-key"></i></span>
+                        {{ form.token(class="form-control font-monospace" + (" is-invalid" if form.token.errors else ""), placeholder="HANDOVER-xxxx...", id="token") }}
+                        {% for error in form.token.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+                    <small class="text-muted">The buyer's order screen displays this code directly underneath their QR image.</small>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-campus btn-lg fw-bold">
+                        <i class="bi bi-shield-check me-1"></i> Verify & Complete Handover
+                    </button>
+                    <a href="{{ url_for('orders.detail', order_id=order.id) }}" class="btn btn-outline-secondary">
+                        Back to Order Tracking
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/qr_scanner.js') }}"></script>
+{% endblock %}

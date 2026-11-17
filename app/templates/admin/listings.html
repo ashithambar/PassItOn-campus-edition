@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Listings – Campus Admin{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-tag-fill text-teal me-2" style="color: #0f766e;"></i> Listings Moderation</h3>
+            <p class="text-muted small mb-0">Review campus listings and remove prohibited or spam items</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <form method="GET" class="d-flex gap-1">
+                <input type="text" name="q" class="form-control form-control-sm" placeholder="Search title, description..." value="{{ search }}">
+                <button type="submit" class="btn btn-campus btn-sm">Search</button>
+                {% if search %}<a href="{{ url_for('admin.listings') }}" class="btn btn-outline-secondary btn-sm">Clear</a>{% endif %}
+            </form>
+            <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Admin Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="d-flex gap-2 mb-3">
+        <a href="{{ url_for('admin.listings', status='all', q=search) }}" class="btn btn-sm {% if current_status == 'all' %}btn-dark{% else %}btn-outline-secondary{% endif %}">All</a>
+        <a href="{{ url_for('admin.listings', status='available', q=search) }}" class="btn btn-sm {% if current_status == 'available' %}btn-campus{% else %}btn-outline-secondary{% endif %}">Available</a>
+        <a href="{{ url_for('admin.listings', status='reserved', q=search) }}" class="btn btn-sm {% if current_status == 'reserved' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}">Reserved</a>
+        <a href="{{ url_for('admin.listings', status='sold', q=search) }}" class="btn btn-sm {% if current_status == 'sold' %}btn-success{% else %}btn-outline-secondary{% endif %}">Sold</a>
+        <a href="{{ url_for('admin.listings', status='deleted', q=search) }}" class="btn btn-sm {% if current_status == 'deleted' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Deleted</a>
+    </div>
+
+    <div class="table-responsive bg-white rounded-3 border shadow-sm">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small text-muted text-uppercase">
+                <tr>
+                    <th style="width: 70px;">Item</th>
+                    <th>Title & Category</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Condition</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in listings %}
+                    <tr class="{% if item.status == 'deleted' %}table-light opacity-50{% endif %}">
+                        <td>
+                            <img src="{{ url_for('static', filename=item.primary_image) }}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;">
+                        </td>
+                        <td>
+                            <div class="fw-bold small text-truncate" style="max-width: 200px;">
+                                <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="text-decoration-none text-dark">
+                                    {{ item.title }}
+                                </a>
+                            </div>
+                            <small class="text-muted">{{ item.category.name }} • <i class="bi bi-geo-alt"></i> {{ item.location }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold small">{{ item.seller.name }}</div>
+                            <div class="text-muted" style="font-size: 0.72rem;">{{ item.seller.department }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(item.price) }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-condition-{{ item.condition|lower|replace(' ', '') }}">{{ item.condition }}</span>
+                        </td>
+                        <td>
+                            {% if item.status == 'available' %}
+                                <span class="badge badge-status-available">Available</span>
+                            {% elif item.status == 'reserved' %}
+                                <span class="badge badge-status-reserved">Reserved</span>
+                            {% elif item.status == 'sold' %}
+                                <span class="badge badge-status-sold">Sold</span>
+                            {% elif item.status == 'deleted' %}
+                                <span class="badge bg-danger">Deleted</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="text-muted">{{ item.views_count }}</small></td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="btn btn-sm btn-outline-secondary" title="View Listing">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if item.status != 'deleted' %}
+                                    <form method="POST" action="{{ url_for('admin.delete_listing', listing_id=item.id) }}" class="d-inline" onsubmit="return confirm('Moderate and remove this listing?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Listing">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

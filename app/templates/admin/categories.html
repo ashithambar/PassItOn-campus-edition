@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Categories – Campus Admin{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi bi-grid-fill text-teal me-2" style="color: #0f766e;"></i> Categories Management</h3>
+            <p class="text-muted small mb-0">Add, customize, and edit campus product categories</p>
+        </div>
+        <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Admin Home
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left: Categories List -->
+        <div class="col-lg-7">
+            <div class="card card-campus border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Active Categories ({{ categories|length }})</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-muted text-uppercase">
+                            <tr>
+                                <th style="width: 50px;">Icon</th>
+                                <th>Name & Slug</th>
+                                <th>Listings</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in categories %}
+                                <tr>
+                                    <td>
+                                        <div class="category-icon-box bg-light" style="width: 38px; height: 38px; font-size: 1.1rem; margin: 0;">
+                                            <i class="bi {{ c.icon }}"></i>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold small">{{ c.name }}</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">slug: /{{ c.slug }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ c.listings.count() }} items</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <a href="{{ url_for('admin.edit_category', cat_id=c.id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('admin.delete_category', cat_id=c.id) }}" class="d-inline" onsubmit="return confirm('Delete category {{ c.name }}?');">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Add New Category Form -->
+        <div class="col-lg-5">
+            <div class="card card-campus border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Add New Category</h5>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Category Name *</label>
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Sports Gear") }}
+                        {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Bootstrap Icon Class *</label>
+                        {{ form.icon(class="form-control" + (" is-invalid" if form.icon.errors else ""), placeholder="bi-trophy, bi-laptop, bi-book...") }}
+                        <small class="text-muted">Use standard Bootstrap Icons (e.g. bi-book, bi-bicycle, bi-camera)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Description</label>
+                        {{ form.description(class="form-control", rows=3, placeholder="Short description of items in this category...") }}
+                    </div>
+
+                    <button type="submit" class="btn btn-campus w-100 fw-semibold">
+                        <i class="bi bi-plus-circle me-1"></i> Add Category
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
