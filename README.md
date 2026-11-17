@@ -294,3 +294,4 @@ All test accounts are pre-seeded with realistic data and pre-generated profile p
 
 ## 📄 License
 Academic Mini-Project for college evaluation. Free to run and customize for educational purposes.
+# PassItOn-campus-edition
