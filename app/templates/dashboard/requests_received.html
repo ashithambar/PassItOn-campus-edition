@@ -54,7 +54,7 @@
                                 <div class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-telephone me-1"></i>{{ order.buyer.phone }}</div>
                             </td>
                             <td>
-                                <div class="fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(order.listing.price) }}</div>
+                                <div class="fw-bold text-teal">₹{{ "{:,.0f}".format(order.listing.price) }}</div>
                             </td>
                             <td>
                                 <span class="badge bg-light text-dark border small text-uppercase">{{ order.payment_method }}</span>

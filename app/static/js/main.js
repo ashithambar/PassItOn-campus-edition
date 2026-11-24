@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (icon) {
                             icon.classList.remove('bi-heart');
                             icon.classList.add('bi-heart-fill');
-                            icon.style.color = '#e11d48';
+                            icon.style.color = '#A53860';
                         }
                     } else {
                         btn.classList.remove('active');

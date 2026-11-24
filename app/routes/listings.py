@@ -1,3 +1,4 @@
+import math
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, abort
 from flask_login import login_required, current_user
 from app.models import db, Listing, ListingImage, Category, User, Wishlist, Report
@@ -167,14 +168,38 @@ def create():
 
 @listings_bp.route('/api/smart-price')
 def api_smart_price():
-    category_id = request.args.get('category_id', type=int)
+    raw_category_id = request.args.get('category_id', '')
+    try:
+        category_id = int(raw_category_id)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Select a valid category before requesting a price suggestion.'}), 400
+
+    if category_id <= 0 or not Category.query.filter_by(id=category_id).first():
+        return jsonify({'error': 'The selected category does not exist.'}), 400
+
     condition = request.args.get('condition', 'Good')
-    original_price = request.args.get('original_price', type=float)
-    item_age = request.args.get('item_age_months', 0, type=int)
-    
-    if not category_id:
-        return jsonify({'error': 'category_id is required'}), 400
-        
+    if condition not in {'New', 'Like New', 'Good', 'Used'}:
+        return jsonify({'error': 'Select a valid item condition.'}), 400
+
+    raw_original_price = request.args.get('original_price')
+    if raw_original_price in (None, ''):
+        original_price = None
+    else:
+        try:
+            original_price = float(raw_original_price)
+        except ValueError:
+            return jsonify({'error': 'Original price must be a valid number.'}), 400
+        if not math.isfinite(original_price) or original_price < 0:
+            return jsonify({'error': 'Original price must be zero or greater.'}), 400
+
+    raw_item_age = request.args.get('item_age_months', '0')
+    try:
+        item_age = int(raw_item_age)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Item age must be a whole number of months.'}), 400
+    if item_age < 0:
+        return jsonify({'error': 'Item age cannot be negative.'}), 400
+
     suggestion = calculate_smart_price(
         category_id=category_id,
         condition=condition,

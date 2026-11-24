@@ -30,7 +30,7 @@
                         <div class="small text-muted">Seller: <strong>{{ listing.seller.name }}</strong> ({{ listing.seller.department }})</div>
                     </div>
                     <div class="col-sm-3 text-sm-end">
-                        <div class="fs-4 fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(listing.price) }}</div>
+                        <div class="fs-4 fw-bold text-teal">₹{{ "{:,.0f}".format(listing.price) }}</div>
                         {% if listing.original_price and listing.original_price > listing.price %}
                             <small class="text-muted text-decoration-line-through">₹{{ "{:,.0f}".format(listing.original_price) }}</small>
                         {% endif %}
@@ -51,7 +51,7 @@
                                 <div>
                                     <label for="{{ subfield.id }}" class="fw-semibold text-dark mb-1 d-block cursor-pointer">
                                         {% if subfield.data == 'upi' %}
-                                            <i class="bi bi-qr-code-scan text-teal me-1" style="color: #0f766e;"></i> UPI / GPay Demo QR Code (Fast & Digital)
+                                            <i class="bi bi-qr-code-scan text-teal me-1"></i> UPI / GPay Demo QR Code (Fast & Digital)
                                         {% else %}
                                             <i class="bi bi-cash-stack text-success me-1"></i> Cash on Campus Handover (In-Person)
                                         {% endif %}

@@ -80,7 +80,7 @@
 
                 <!-- Price Tag & Discount -->
                 <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-baseline gap-3">
-                    <span class="display-6 fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(listing.price) }}</span>
+                    <span class="display-6 fw-bold text-teal">₹{{ "{:,.0f}".format(listing.price) }}</span>
                     {% if listing.original_price and listing.original_price > listing.price %}
                         <span class="text-muted text-decoration-line-through fs-5">₹{{ "{:,.0f}".format(listing.original_price) }}</span>
                         <span class="badge bg-danger-subtle text-danger px-2 py-1 fw-bold">
@@ -217,8 +217,8 @@
 
         <div class="col-lg-4">
             <!-- Safety Box on Listing Page -->
-            <div class="card border-0 shadow-sm p-4 rounded-4" style="background-color: #f0fdfa; border-left: 5px solid #0f766e !important;">
-                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-teal fs-5 me-1" style="color: #0f766e;"></i> Campus Safety Checklist</h6>
+            <div class="card border-0 shadow-sm p-4 rounded-4 campus-tint-callout">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-teal fs-5 me-1"></i> Campus Safety Checklist</h6>
                 <ul class="list-unstyled small text-muted mb-0 d-flex flex-column gap-2">
                     <li>✓ Meet at public campus spots (e.g. {{ listing.location }})</li>
                     <li>✓ Test item working condition before paying</li>
@@ -246,7 +246,7 @@
                                         {{ item.title }}
                                     </a>
                                 </h6>
-                                <div class="fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(item.price) }}</div>
+                                <div class="fw-bold text-teal">₹{{ "{:,.0f}".format(item.price) }}</div>
                                 <small class="text-muted">{{ item.location }}</small>
                             </div>
                         </div>

@@ -25,7 +25,7 @@ Designed specifically for college campuses to enable students to buy, sell, and 
 - Provides a live suggested range (e.g. `₹450 – ₹600`) and a **1-click button** to populate the price input field.
 
 ### 3. Campus Listings & Category Navigation
-- 11 pre-seeded categories: **Books, Electronics, Calculators, Stationery, Lab Equipment, Furniture, Clothing, Accessories, Sports Items, College Supplies, Other**.
+- 11 default database categories: **Books, Electronics, Calculators, Stationery, Lab Equipment, Furniture, Clothing, Accessories, Sports Items, College Supplies, Other**. Add or edit categories in the Admin Panel.
 - Multi-photo upload support (stored in `static/uploads/listings` with secure unique filenames and Pillow image optimization).
 - Comprehensive listing details: image gallery, price vs. original MRP, discount percentage, condition badge, views count, seller info, and campus meetup location.
 - Automatic **Similar Items** recommendation carousel on every item page.
@@ -155,7 +155,7 @@ c:\campus\
 │       └── errors/           # 403, 404, 500 error pages
 ├── instance/
 │   └── campus.db             # SQLite database
-├── seed.py                   # Pristine sample database seeder (1 admin, 8 students, 25 items, orders)
+├── seed.py                   # Safe initializer for missing tables, categories, and local admin
 ├── run.py                    # Application launch script (http://127.0.0.1:5000)
 ├── test_app.py               # Complete integration test suite (all 7 tests passing)
 ├── requirements.txt          # Python dependencies
@@ -208,11 +208,12 @@ Open your terminal inside the project directory (`c:\campus`):
 python -m pip install -r requirements.txt
 ```
 
-### 3. Seed Database
-Initialize and seed the database with categories, admin, 8 students, 25 realistic campus listings with pre-rendered photo cards, and sample orders:
+### 3. Initialize the Database
+Create any missing tables and default categories, and create the local admin account if one does not already exist:
 ```bash
 python seed.py
 ```
+This initializer is safe to rerun: it never drops or resets tables, and it does not create sample products, student accounts, orders, reviews, wishlists, or chats. Existing records are preserved.
 
 ### 4. Run the Application
 Start the Flask development server:
@@ -222,65 +223,18 @@ python run.py
 Open your browser and navigate to:
 👉 **`http://127.0.0.1:5000`**
 
-### 5. Run Automated Test Suite
-To verify that all 7 end-to-end integration tests pass:
+### 5. Run Focused Listing Tests
 ```bash
-python test_app.py
+python -m unittest test_changes
 ```
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Local Admin Access
 
-All test accounts are pre-seeded with realistic data and pre-generated profile pictures:
+On a new local database, `python seed.py` creates `admin@campus.edu` with password `Admin@123` if no admin account exists. Change this password before using the site beyond local development. Students can create their own accounts through registration; no sample student accounts or products are added.
 
-| Role | Name | Email | Password | Department & Details |
-| :--- | :--- | :--- | :--- | :--- |
-| **Admin** | Campus Administrator | `admin@campus.edu` | `Admin@123` | Dean of Student Welfare (Full Moderation Access) |
-| **Student** | Aarav Sharma | `aarav@campus.edu` | `Student@123` | Computer Science, 3rd Year (Seller of Casio Calc, DSA Book) |
-| **Student** | Priya Patel | `priya@campus.edu` | `Student@123` | Electronics & Comm, 4th Year (Seller of Arduino Kit, Multimeter) |
-| **Student** | Rohan Verma | `rohan@campus.edu` | `Student@123` | Mechanical Engg, 2nd Year (Seller of Mini Drafter, Bicycle) |
-| **Student** | Ananya Iyer | `ananya@campus.edu` | `Student@123` | Information Technology, 3rd Year (Buyer of Casio Calc) |
-| **Student** | Vikram Singh | `vikram@campus.edu` | `Student@123` | Civil Engineering, 4th Year (Buyer of B.S. Grewal Book) |
-| **Student** | Sneha Reddy | `sneha@campus.edu` | `Student@123` | Biotechnology, 2nd Year (Seller of Lab Coat, Goggles) |
-| **Student** | Kabir Mehta | `kabir@campus.edu` | `Student@123` | MBA / Business, 1st Year (Seller of Placement Blazer) |
-| **Student** | Divya Nair | `divya@campus.edu` | `Student@123` | Architecture & Design, 3rd Year (Seller of Cutting Mat) |
-
-*(Tip: The Sign In page includes a 1-click Quick Login bar for instant credential filling during presentations).*
-
----
-
-## 🔄 End-to-End Demo Workflows
-
-### Flow A: Buyer Flow
-1. Open `http://127.0.0.1:5000` and sign in as **Ananya** (`ananya@campus.edu` / `Student@123`).
-2. Search for `"Arduino"` or browse the **Electronics** category.
-3. Click on the Arduino Uno Starter Kit (listed by **Priya**).
-4. Click **Chat with Seller** to ask a question, or click **Buy / Request Item**.
-5. Select **UPI / GPay Demo QR Code**, write an optional meeting note, and submit the request.
-6. Once Priya accepts the request, visit the Order Tracker page.
-7. View Priya's UPI ID and QR code, enter a reference ID (e.g. `UPI/20261117/8899`), and click **I Have Completed Payment**.
-8. After Priya confirms receipt, your **Handover QR Code** appears with a unique security token.
-9. Meet Priya on campus and present your QR code for scanning.
-10. Once verified, submit a 5-star rating and review.
-
-### Flow B: Seller Flow
-1. Sign in as **Aarav** (`aarav@campus.edu` / `Student@123`).
-2. Click **Sell an Item** in the top navigation bar.
-3. Fill in the title, choose **Calculators**, select **Good** condition, and enter original price `₹1,200` with age `6` months.
-4. Watch the **Rule-Based Smart Price Suggestion** box automatically compute a fair suggested range (e.g. `₹480 – ₹620`).
-5. Click **Apply Suggested Price** to automatically populate the selling price.
-6. Choose a campus handover spot (e.g. `Central Library`) and click **Publish Listing**.
-7. When an incoming order arrives, accept it from your **Requests Received** dashboard tab.
-8. Confirm payment receipt, then click **Scan or Enter Handover Code** to verify the buyer's QR code.
-
-### Flow C: Admin Moderation Flow
-1. Sign in as **Admin** (`admin@campus.edu` / `Admin@123`).
-2. Access the **Admin Panel** from the user dropdown.
-3. Review key metrics and **Chart.js** charts (Category distribution and Order status breakdown).
-4. Visit **Users** to view student accounts and test the **Suspend / Reactivate** toggle.
-5. Visit **Reports** to inspect student complaints, add administrative resolution notes, and resolve or dismiss flags.
-6. Visit **Categories** to add new campus categories or modify existing ones.
+To add inventory, sign in as an administrator, create or review categories in **Admin Panel → Categories**, then choose **Admin Panel → Listings → Add Product**. The Sell Item form uses categories stored in the database; listings appear on the home and browse pages after they are published.
 
 ---
 

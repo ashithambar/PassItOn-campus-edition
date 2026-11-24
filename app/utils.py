@@ -73,7 +73,7 @@ def generate_handover_qr(order_number):
     qr.add_data(qr_data)
     qr.make(fit=True)
     
-    img = qr.make_image(fill_color="#0f766e", back_color="white")  # Campus teal color
+    img = qr.make_image(fill_color="#A53860", back_color="white")
     img.save(file_path)
     
     relative_path = f"uploads/handover_qrs/{qr_filename}"
@@ -103,7 +103,7 @@ def generate_dynamic_upi_qr(upi_id, payee_name, amount):
     qr.add_data(upi_uri)
     qr.make(fit=True)
     
-    img = qr.make_image(fill_color="#1e293b", back_color="white")
+    img = qr.make_image(fill_color="#450920", back_color="white")
     img.save(file_path)
     
     return f"uploads/upi_qrs/{qr_filename}"

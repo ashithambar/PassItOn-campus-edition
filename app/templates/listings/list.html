@@ -8,7 +8,7 @@
     <div class="col-lg-3">
         <div class="card card-campus border-0 shadow-sm p-3 sticky-top" style="top: 85px; z-index: 10;">
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                <h6 class="fw-bold mb-0"><i class="bi bi-funnel-fill text-teal me-1" style="color: #0f766e;"></i> Filters</h6>
+                <h6 class="fw-bold mb-0"><i class="bi bi-funnel-fill text-teal me-1"></i> Filters</h6>
                 <a href="{{ url_for('listings.index') }}" class="small text-danger text-decoration-none">Reset All</a>
             </div>
 
@@ -167,7 +167,7 @@
                                 </h6>
 
                                 <div class="d-flex align-items-baseline gap-2 mb-2">
-                                    <span class="fs-5 fw-bold" style="color: #0f766e;">₹{{ "{:,.0f}".format(item.price) }}</span>
+                                    <span class="fs-5 fw-bold text-teal">₹{{ "{:,.0f}".format(item.price) }}</span>
                                     {% if item.original_price and item.original_price > item.price %}
                                         <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
                                         <span class="badge bg-danger-subtle text-danger small" style="font-size: 0.7rem;">-{{ item.discount_percent }}%</span>

@@ -6,7 +6,7 @@
 <div class="py-2">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h4 class="fw-bold mb-0"><i class="bi bi-chat-dots-fill text-teal me-2" style="color: #0f766e;"></i> Student Messaging</h4>
+            <h4 class="fw-bold mb-0"><i class="bi bi-chat-dots-fill text-teal me-2"></i> Student Messaging</h4>
             <small class="text-muted">Chat directly with campus buyers and sellers</small>
         </div>
         <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary btn-sm">
@@ -37,7 +37,7 @@
                                                 <small class="text-muted" style="font-size: 0.7rem;">{{ c.updated_at.strftime('%d %b') }}</small>
                                             </div>
                                             {% if c.listing %}
-                                                <div class="small text-teal text-truncate fw-semibold" style="color: #0f766e; font-size: 0.75rem;">
+                                                <div class="small text-teal text-truncate fw-semibold" style="font-size: 0.75rem;">
                                                     <i class="bi bi-tag-fill me-1"></i>{{ c.listing.title }}
                                                 </div>
                                             {% endif %}
@@ -89,7 +89,7 @@
                                 <img src="{{ url_for('static', filename=active_convo.listing.primary_image) }}" class="rounded border" style="width: 36px; height: 36px; object-fit: cover;">
                                 <div class="small">
                                     <span class="fw-bold text-dark">{{ active_convo.listing.title }}</span>
-                                    <span class="text-teal ms-1 fw-bold" style="color: #0f766e;">₹{{ "{:,.0f}".format(active_convo.listing.price) }}</span>
+                                    <span class="text-teal ms-1 fw-bold">₹{{ "{:,.0f}".format(active_convo.listing.price) }}</span>
                                 </div>
                             </div>
                             <a href="{{ url_for('listings.detail', listing_id=active_convo.listing.id) }}" class="btn btn-sm btn-campus-outline py-0 px-2" style="font-size: 0.72rem;">
@@ -124,7 +124,7 @@
                 {% else %}
                     <!-- No Active Chat Selected -->
                     <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted p-5">
-                        <i class="bi bi-chat-square-heart fs-1 mb-2 text-teal" style="color: #0f766e;"></i>
+                        <i class="bi bi-chat-square-heart fs-1 mb-2 text-teal"></i>
                         <h5 class="fw-bold text-dark">Your Campus Conversations</h5>
                         <p class="small text-center max-w-400">Select a conversation from the left, or browse items and click "Chat with Seller" to connect with a fellow student.</p>
                         <a href="{{ url_for('listings.index') }}" class="btn btn-campus btn-sm mt-2">Browse Items</a>

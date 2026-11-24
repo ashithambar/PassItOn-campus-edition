@@ -7,6 +7,23 @@ from app.utils import admin_required
 
 admin_bp = Blueprint('admin', __name__)
 
+
+def _category_slug(name):
+    return name.strip().lower().replace(' ', '-').replace('&', 'and')
+
+
+def _find_duplicate_category(name, slug, exclude_id=None):
+    query = Category.query.filter(
+        db.or_(
+            db.func.lower(Category.name) == name.lower(),
+            db.func.lower(Category.slug) == slug.lower()
+        )
+    )
+    if exclude_id is not None:
+        query = query.filter(Category.id != exclude_id)
+    return query.first()
+
+
 @admin_bp.before_request
 @login_required
 def check_admin():
@@ -163,14 +180,13 @@ def transactions():
 def categories():
     form = CategoryForm()
     if form.validate_on_submit():
-        slug = form.name.data.strip().lower().replace(' ', '-').replace('&', 'and')
-        # Check uniqueness
-        existing = Category.query.filter_by(name=form.name.data.strip()).first()
-        if existing:
-            flash("A category with this name already exists.", "danger")
+        name = form.name.data.strip()
+        slug = _category_slug(name)
+        if _find_duplicate_category(name, slug):
+            flash("A category with this name or URL already exists.", "danger")
         else:
             cat = Category(
-                name=form.name.data.strip(),
+                name=name,
                 slug=slug,
                 icon=form.icon.data.strip(),
                 description=form.description.data.strip() if form.description.data else None
@@ -192,8 +208,14 @@ def edit_category(cat_id):
         
     form = CategoryForm(obj=cat)
     if form.validate_on_submit():
-        cat.name = form.name.data.strip()
-        cat.slug = form.name.data.strip().lower().replace(' ', '-').replace('&', 'and')
+        name = form.name.data.strip()
+        slug = _category_slug(name)
+        if _find_duplicate_category(name, slug, exclude_id=cat.id):
+            flash("A category with this name or URL already exists.", "danger")
+            return render_template('admin/edit_category.html', form=form, category=cat)
+
+        cat.name = name
+        cat.slug = slug
         cat.icon = form.icon.data.strip()
         cat.description = form.description.data.strip() if form.description.data else None
         db.session.commit()

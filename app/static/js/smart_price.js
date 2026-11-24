@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const origPrice = origPriceInput ? origPriceInput.value : '';
         const ageMonths = ageInput ? ageInput.value : 0;
 
-        if (!catId) {
+        if (!/^[1-9]\d*$/.test(catId)) {
+            currentSuggestedPrice = 0;
             suggestionBox.style.display = 'none';
             return;
         }
@@ -38,7 +39,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         fetch(`/listings/api/smart-price?${params.toString()}`)
-            .then(res => res.json())
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unable to calculate a price suggestion.');
+                }
+                return data;
+            })
             .then(data => {
                 if (data && data.suggested_price) {
                     currentSuggestedPrice = data.suggested_price;
@@ -49,6 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(err => {
+                currentSuggestedPrice = 0;
+                suggestionBox.style.display = 'none';
                 console.error("Smart price fetch error:", err);
             });
     }

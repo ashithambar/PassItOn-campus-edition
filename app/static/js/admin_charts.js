@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!categoryCanvas && !ordersCanvas) return;
 
+    Chart.defaults.color = '#450920';
+
     fetch('/admin/api/stats')
         .then(res => res.json())
         .then(data => {
@@ -19,12 +21,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         datasets: [{
                             data: data.categories.counts,
                             backgroundColor: [
-                                '#0f766e', '#0284c7', '#4f46e5', '#7c3aed',
-                                '#db2777', '#ea580c', '#ca8a04', '#16a34a',
-                                '#0d9488', '#64748b', '#e11d48'
+                                '#DA627D', '#A53860', '#450920', '#FFA5AB',
+                                '#DA627D', '#A53860', '#450920', '#FFA5AB',
+                                '#DA627D', '#A53860', '#450920'
                             ],
                             borderWidth: 2,
-                            borderColor: '#ffffff'
+                            borderColor: '#FFFFFF'
                         }]
                     },
                     options: {
@@ -49,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         datasets: [{
                             label: 'Orders Count',
                             data: data.orders.counts,
-                            backgroundColor: '#0f766e',
+                            backgroundColor: '#A53860',
                             borderRadius: 6
                         }]
                     },
@@ -77,9 +79,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         labels: data.conditions.labels,
                         datasets: [{
                             data: data.conditions.counts,
-                            backgroundColor: ['#10b981', '#38bdf8', '#818cf8', '#fbbf24'],
+                            backgroundColor: ['#DA627D', '#A53860', '#450920', '#FFA5AB'],
                             borderWidth: 2,
-                            borderColor: '#ffffff'
+                            borderColor: '#FFFFFF'
                         }]
                     },
                     options: {

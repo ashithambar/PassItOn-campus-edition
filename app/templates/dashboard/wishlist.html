@@ -58,7 +58,7 @@
                             </h6>
 
                             <div class="d-flex align-items-baseline gap-2 mb-2">
-                                <span class="fs-5 fw-bold text-teal" style="color: #0f766e;">₹{{ "{:,.0f}".format(item.price) }}</span>
+                                <span class="fs-5 fw-bold text-teal">₹{{ "{:,.0f}".format(item.price) }}</span>
                                 {% if item.original_price and item.original_price > item.price %}
                                     <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
                                 {% endif %}
