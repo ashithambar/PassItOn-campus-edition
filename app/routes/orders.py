@@ -2,7 +2,7 @@ import secrets
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, jsonify
 from flask_login import login_required, current_user
-from app.models import db, Order, Payment, HandoverRecord, Listing, User, Review, Wishlist
+from app.models import db, Order, Payment, HandoverRecord, Listing, User, Review, Wishlist, BorrowRequest
 from app.forms import OrderRequestForm, PaymentProofForm, HandoverVerifyForm, ReviewForm
 from app.utils import (
     generate_handover_qr, generate_dynamic_upi_qr, 
@@ -11,13 +11,37 @@ from app.utils import (
 
 orders_bp = Blueprint('orders', __name__)
 
+ACTIVE_ORDER_STATUSES = (
+    'request_sent', 'accepted', 'payment_pending', 'payment_completed',
+    'payment_confirmed', 'handover_pending'
+)
+
+
+def release_listing_if_unreserved(order):
+    if order.listing.status != 'reserved':
+        return
+
+    active_order = Order.query.filter(
+        Order.listing_id == order.listing_id,
+        Order.id != order.id,
+        Order.status.in_(ACTIVE_ORDER_STATUSES)
+    ).first()
+    active_borrow = BorrowRequest.query.filter_by(active_listing_id=order.listing_id).first()
+    if not active_order and not active_borrow:
+        order.listing.status = 'available'
+
+
 @orders_bp.route('/request/<int:listing_id>', methods=['GET', 'POST'])
 @login_required
 def request_item(listing_id):
     listing = db.session.get(Listing, listing_id)
-    if not listing or listing.status != 'available':
+    if not listing or listing.status != 'available' or not listing.is_sellable:
         flash("This item is no longer available for purchase.", "warning")
         return redirect(url_for('listings.index'))
+
+    if BorrowRequest.query.filter_by(active_listing_id=listing.id).first():
+        flash("This item already has an active borrowing request.", "warning")
+        return redirect(url_for('listings.detail', listing_id=listing.id))
         
     if listing.seller_id == current_user.id:
         flash("You cannot buy or request your own listing.", "warning")
@@ -123,7 +147,15 @@ def accept_request(order_id):
     if order.status != 'request_sent':
         flash("Order cannot be accepted in its current state.", "warning")
         return redirect(url_for('orders.detail', order_id=order.id))
-        
+
+    if order.listing.status != 'available' or not order.listing.is_sellable:
+        flash("This item is no longer available for purchase.", "warning")
+        return redirect(url_for('orders.detail', order_id=order.id))
+
+    if BorrowRequest.query.filter_by(active_listing_id=order.listing_id).first():
+        flash("This item has an active borrowing request and cannot be sold.", "warning")
+        return redirect(url_for('orders.detail', order_id=order.id))
+
     # Reserve listing
     order.listing.status = 'reserved'
     
@@ -163,9 +195,12 @@ def reject_request(order_id):
     if not order or (order.seller_id != current_user.id and not current_user.is_admin):
         abort(403)
         
+    if order.status not in ACTIVE_ORDER_STATUSES:
+        flash("Order cannot be rejected in its current state.", "warning")
+        return redirect(url_for('orders.detail', order_id=order.id))
+
     order.status = 'rejected'
-    if order.listing.status == 'reserved':
-        order.listing.status = 'available'
+    release_listing_if_unreserved(order)
         
     db.session.commit()
     
@@ -193,8 +228,7 @@ def cancel_order(order_id):
         return redirect(url_for('orders.detail', order_id=order.id))
         
     order.status = 'cancelled'
-    if order.listing.status == 'reserved':
-        order.listing.status = 'available'
+    release_listing_if_unreserved(order)
         
     db.session.commit()
     
@@ -327,6 +361,10 @@ def verify_handover(order_id):
         
     if order.status != 'handover_pending':
         flash("Order is not currently pending handover.", "warning")
+        return redirect(url_for('orders.detail', order_id=order.id))
+
+    if order.listing.status != 'reserved' or not order.listing.is_sellable:
+        flash("This sale is no longer eligible for handover.", "warning")
         return redirect(url_for('orders.detail', order_id=order.id))
         
     form = HandoverVerifyForm()

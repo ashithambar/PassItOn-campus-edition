@@ -3,7 +3,7 @@
 
 A complete, runnable full-stack student-to-student campus marketplace web application built with **Python Flask**, **SQLite (SQLAlchemy)**, **Bootstrap 5**, **Chart.js**, and **QR verification**.
 
-Designed specifically for college campuses to enable students to buy, sell, and reuse academic textbooks, scientific calculators, laboratory equipment, engineering drawing instruments, hostel essentials, and sports gear safely and affordably.
+Designed specifically for college campuses to let students buy, sell, and borrow academic textbooks, scientific calculators, laboratory equipment, engineering drawing instruments, hostel essentials, and sports gear safely and affordably.
 
 ---
 
@@ -26,6 +26,7 @@ Designed specifically for college campuses to enable students to buy, sell, and 
 
 ### 3. Campus Listings & Category Navigation
 - 11 default database categories: **Books, Electronics, Calculators, Stationery, Lab Equipment, Furniture, Clothing, Accessories, Sports Items, College Supplies, Other**. Add or edit categories in the Admin Panel.
+- Listings can be **Sell Only**, **Borrow Only**, or **Sell and Borrow**; borrowed-only inventory is excluded from Buy Items.
 - Multi-photo upload support (stored in `static/uploads/listings` with secure unique filenames and Pillow image optimization).
 - Comprehensive listing details: image gallery, price vs. original MRP, discount percentage, condition badge, views count, seller info, and campus meetup location.
 - Automatic **Similar Items** recommendation carousel on every item page.
@@ -62,30 +63,37 @@ Designed specifically for college campuses to enable students to buy, sell, and 
   - **Manual Fallback**: If camera access is disabled, seller can type the printed token directly.
 - Upon verification, the token is invalidated, the order status becomes `Completed`, the item is marked `Sold`, and both parties are notified.
 
-### 9. Student-to-Student Direct Chat
+### 9. Campus Borrowing
+- Dedicated Borrow Items page with search, category, condition, and sorting filters.
+- Borrow requests record requested start and return dates and use their own pending, approved, borrowed, return-requested, returned, rejected, and overdue states.
+- Owners approve or reject requests, confirm handover, and confirm returns. A unique active-request lock prevents concurrent loans; borrowing never marks an item Sold.
+- Listings remain Reserved while a request is pending or approved and Borrowed while on loan; confirmed returns make the listing available again.
+
+### 10. Student-to-Student Direct Chat
 - In-platform messaging between buyers and sellers.
 - Automatically creates a conversation with a reference card showing the item title, image, and price.
 - Live AJAX polling (every 3.5 seconds) with auto-scroll and instant message dispatch.
 - Navbar badge shows live count of unread messages.
 
-### 10. Reviews & Ratings System
+### 11. Reviews & Ratings System
 - Mutual feedback: After a completed handover, both the buyer and seller can rate each other (1 to 5 stars) and write a short review.
 - Ratings can only be submitted once per order.
 - Average star rating and reviews are displayed on student profile pages and listing detail cards.
 
-### 11. Campus Safety Center & Moderation Reports
+### 12. Campus Safety Center & Moderation Reports
 - Dedicated Campus Safety Guide detailing safe meetup locations (Library lawn, Cafeteria, Department lobbies), pre-payment testing, and QR security.
 - Students can report fraudulent listings or suspicious users with categorized reasons (Fake, Wrong Info, Scam, Inappropriate).
 - Administrators can review, dismiss, or resolve reports, with 1-click actions to delete listings or suspend student accounts.
 
-### 12. User Dashboard
-- **Overview**: At-a-glance metrics (Active Listings, Sold Items, Requests Received, Purchases, Wishlist count, Average Rating).
-- **My Listings**: Tabbed management for Available, Reserved, and Sold items with Edit, Delete, and Mark Sold options.
+### 13. User Dashboard
+- **Overview**: At-a-glance listing, purchase request, and borrowing activity.
+- **My Listings**: Manage Available, Reserved, Borrowed, and Sold items with Edit, Delete, and View actions.
 - **Requests Received**: Accept or decline incoming purchase requests.
 - **My Purchases**: Track order lifecycle, access Handover QR, and review sellers.
+- **My Borrowings / Borrow Requests**: Track requested dates, approvals, handovers, overdue items, and return confirmation.
 - **Notification Center**: Bell icon with unread count and full list with 1-click mark-all-read.
 
-### 13. Admin Dashboard & Chart.js Analytics
+### 14. Admin Dashboard & Chart.js Analytics
 - Protected `/admin` area restricted to users with `role='admin'`.
 - Real-time KPI cards: Total Students, Total Listings, Active Listings, Items Sold, Total Demo Volume (₹), Pending Reports.
 - **Chart.js Visualizations**:
@@ -119,15 +127,17 @@ c:\campus\
 ├── app/
 │   ├── __init__.py           # Flask app factory, extensions, error handlers, context processors
 │   ├── config.py             # App configuration, database URI, upload limits
-│   ├── models.py             # SQLAlchemy models (User, Listing, Order, Payment, Handover, etc.)
-│   ├── forms.py              # Flask-WTF forms for auth, listings, orders, reviews, reports
+│   ├── models.py             # SQLAlchemy models (User, Listing, BorrowRequest, Order, etc.)
+│   ├── forms.py              # Flask-WTF forms for auth, listings, borrowing, orders, reviews
+│   ├── migrations.py         # Additive schema upgrade for existing local databases
 │   ├── utils.py              # File upload, QR generation, smart price algorithm, notifications
 │   ├── routes/
 │   │   ├── __init__.py
 │   │   ├── auth.py           # Register, login, logout, password reset, profile edit, report user
 │   │   ├── main.py           # Homepage, campus safety guide, about page
 │   │   ├── listings.py       # Browse, search/filters, create, edit, delete, smart price API
-│   │   ├── orders.py         # Request flow, accept/reject, demo UPI, QR handover, reviews
+│   │   ├── orders.py         # Purchase flow, demo UPI, QR handover, reviews
+│   │   ├── borrow.py         # Borrow requests, approvals, handovers, and returns
 │   │   ├── chat.py           # Student messaging, live polling API
 │   │   ├── dashboard.py      # User dashboard (listings, requests, purchases, wishlist, notifs)
 │   │   └── admin.py          # Admin dashboard, stats API, users, listings, categories, reports
@@ -143,11 +153,12 @@ c:\campus\
 │   │   └── uploads/          # Static file uploads (listings, avatars, upi_qrs, handover_qrs)
 │   └── templates/
 │       ├── base.html         # Base layout with navbar, alerts, footer
-│       ├── index.html        # College-themed homepage with stats, categories, featured items
+│       ├── index.html        # Responsive Buy/Sell/Borrow homepage
 │       ├── safety.html       # Campus safety guidelines and meetup checklist
 │       ├── about.html        # Project mission and technical architecture
 │       ├── auth/             # Login, register, forgot/reset password, profile, edit profile
-│       ├── listings/         # Browse list, create (with smart price), edit, detail, report
+│       ├── listings/         # Browse, Buy, create/edit, detail, and report
+│       ├── borrow/           # Borrow browse, request, and borrower/owner dashboards
 │       ├── orders/           # Request form, tracking detail, scan QR, review
 │       ├── chat/             # Direct messaging view
 │       ├── dashboard/        # Overview, my listings, requests received, purchases, wishlist
@@ -182,6 +193,9 @@ erDiagram
     
     Listing ||--o{ ListingImage : "has photos"
     Listing ||--o{ Order : "ordered in"
+    Listing ||--o{ BorrowRequest : "borrowed in"
+    User ||--o{ BorrowRequest : "borrows"
+    User ||--o{ BorrowRequest : "owns"
     Listing ||--o{ Wishlist : "saved in"
     Listing ||--o{ Report : "reported in"
     
@@ -220,6 +234,7 @@ Start the Flask development server:
 ```bash
 python run.py
 ```
+Startup applies a non-destructive schema upgrade: existing listings receive `listing_type='sell_only'`, and the borrowing-request table is created if missing. Existing users, listings, orders, payments, and related records are retained.
 Open your browser and navigate to:
 👉 **`http://127.0.0.1:5000`**
 

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
-from app.models import db, Listing, Order, Wishlist, Notification, Review
+from app.models import db, Listing, Order, Wishlist, Notification, BorrowRequest
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -9,26 +9,24 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def index():
     # Overall dashboard overview
     my_active_listings = Listing.query.filter_by(seller_id=current_user.id, status='available').count()
-    my_sold_listings = Listing.query.filter_by(seller_id=current_user.id, status='sold').count()
-    
     requests_received = Order.query.filter_by(seller_id=current_user.id).order_by(Order.created_at.desc()).limit(5).all()
     my_purchases = Order.query.filter_by(buyer_id=current_user.id).order_by(Order.created_at.desc()).limit(5).all()
-    
-    wishlist_count = Wishlist.query.filter_by(user_id=current_user.id).count()
-    avg_rating = current_user.get_average_rating()
-    rating_count = current_user.rating_count
+    my_active_borrowings = BorrowRequest.query.filter_by(
+        borrower_id=current_user.id
+    ).filter(BorrowRequest.status.in_(['approved', 'borrowed', 'return_requested'])).count()
+    pending_borrow_requests = BorrowRequest.query.filter_by(
+        owner_id=current_user.id, status='pending'
+    ).count()
     
     recent_notifs = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(5).all()
 
     return render_template(
         'dashboard/index.html',
         active_listings_count=my_active_listings,
-        sold_listings_count=my_sold_listings,
         requests_received=requests_received,
         my_purchases=my_purchases,
-        wishlist_count=wishlist_count,
-        avg_rating=avg_rating,
-        rating_count=rating_count,
+        my_active_borrowings_count=my_active_borrowings,
+        pending_borrow_requests_count=pending_borrow_requests,
         recent_notifs=recent_notifs
     )
 
@@ -39,7 +37,7 @@ def my_listings():
     status = request.args.get('status', 'all')
     query = Listing.query.filter_by(seller_id=current_user.id).filter(Listing.status != 'deleted')
     
-    if status in ['available', 'reserved', 'sold']:
+    if status in ['available', 'reserved', 'borrowed', 'sold']:
         query = query.filter_by(status=status)
         
     listings = query.order_by(Listing.created_at.desc()).all()

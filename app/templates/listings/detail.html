@@ -30,11 +30,15 @@
                             </span>
                         {% elif listing.status == 'reserved' %}
                             <span class="badge badge-status-reserved px-3 py-2 rounded-pill fw-bold">
-                                <i class="bi bi-clock-fill me-1"></i> Reserved for Buyer
+                                <i class="bi bi-clock-fill me-1"></i> Reserved
                             </span>
                         {% elif listing.status == 'sold' %}
                             <span class="badge badge-status-sold px-3 py-2 rounded-pill fw-bold">
                                 <i class="bi bi-bag-check-fill me-1"></i> Sold & Handed Over
+                            </span>
+                        {% elif listing.status == 'borrowed' %}
+                            <span class="badge badge-status-borrowed px-3 py-2 rounded-pill fw-bold">
+                                <i class="bi bi-arrow-left-right me-1"></i> Currently Borrowed
                             </span>
                         {% endif %}
                     </div>
@@ -61,7 +65,7 @@
                     <span class="badge bg-secondary-subtle text-secondary px-2 py-1 text-uppercase fw-semibold" style="font-size: 0.75rem;">
                         {{ listing.category.name }}
                     </span>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
                         {% if listing.condition == 'New' %}
                             <span class="badge badge-condition-new">Brand New</span>
                         {% elif listing.condition == 'Like New' %}
@@ -71,6 +75,13 @@
                         {% else %}
                             <span class="badge badge-condition-used">Used</span>
                         {% endif %}
+                        {% if listing.listing_type == 'sell_only' %}
+                            <span class="badge badge-mode-sale">For Sale</span>
+                        {% elif listing.listing_type == 'borrow_only' %}
+                            <span class="badge badge-mode-borrow">For Borrowing</span>
+                        {% else %}
+                            <span class="badge badge-mode-both">For Sale & Borrowing</span>
+                        {% endif %}
                         <span class="text-muted small"><i class="bi bi-eye"></i> {{ listing.views_count }} views</span>
                     </div>
                 </div>
@@ -79,15 +90,17 @@
                 <h3 class="fw-bold mb-3">{{ listing.title }}</h3>
 
                 <!-- Price Tag & Discount -->
-                <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-baseline gap-3">
-                    <span class="display-6 fw-bold text-teal">₹{{ "{:,.0f}".format(listing.price) }}</span>
-                    {% if listing.original_price and listing.original_price > listing.price %}
-                        <span class="text-muted text-decoration-line-through fs-5">₹{{ "{:,.0f}".format(listing.original_price) }}</span>
-                        <span class="badge bg-danger-subtle text-danger px-2 py-1 fw-bold">
-                            Save {{ listing.discount_percent }}% OFF MRP
-                        </span>
-                    {% endif %}
-                </div>
+                {% if listing.is_sellable %}
+                    <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-baseline gap-3">
+                        <span class="display-6 fw-bold text-primary">₹{{ "{:,.0f}".format(listing.price) }}</span>
+                        {% if listing.original_price and listing.original_price > listing.price %}
+                            <span class="text-muted text-decoration-line-through fs-5">₹{{ "{:,.0f}".format(listing.original_price) }}</span>
+                            <span class="badge bg-danger-subtle text-danger px-2 py-1 fw-bold">
+                                Save {{ listing.discount_percent }}% OFF MRP
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endif %}
 
                 <!-- Campus Handover Location -->
                 <div class="mb-4">
@@ -116,14 +129,6 @@
                             <a href="{{ url_for('listings.edit', listing_id=listing.id) }}" class="btn btn-outline-primary flex-fill">
                                 <i class="bi bi-pencil-square me-1"></i> Edit Listing
                             </a>
-                            {% if listing.status == 'available' %}
-                                <form method="POST" action="{{ url_for('listings.mark_sold', listing_id=listing.id) }}" class="d-inline">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-outline-success">
-                                        <i class="bi bi-check2-circle me-1"></i> Mark as Sold
-                                    </button>
-                                </form>
-                            {% endif %}
                             <form method="POST" action="{{ url_for('listings.delete', listing_id=listing.id) }}" class="d-inline" onsubmit="return confirm('Delete this listing permanently?');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-outline-danger">
@@ -135,9 +140,16 @@
                         <!-- Buyer Action Controls -->
                         <div class="d-flex flex-column gap-2">
                             {% if listing.status == 'available' %}
-                                <a href="{{ url_for('orders.request_item', listing_id=listing.id) }}" class="btn btn-campus btn-lg py-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm">
-                                    <i class="bi bi-bag-plus-fill fs-5"></i> Buy / Request Item
-                                </a>
+                                {% if listing.is_sellable %}
+                                    <a href="{{ url_for('orders.request_item', listing_id=listing.id) }}" class="btn btn-campus btn-lg py-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                                        <i class="bi bi-bag-plus-fill fs-5"></i> Buy / Request Item
+                                    </a>
+                                {% endif %}
+                                {% if listing.is_borrowable %}
+                                    <a href="{{ url_for('borrow.request_item', listing_id=listing.id) }}" class="btn btn-campus-outline btn-lg py-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-arrow-left-right fs-5"></i> Request to Borrow
+                                    </a>
+                                {% endif %}
                             {% else %}
                                 <button class="btn btn-secondary btn-lg py-3 fw-bold" disabled>
                                     <i class="bi bi-slash-circle me-1"></i> Item {{ listing.status|capitalize }} (Unavailable)
@@ -246,7 +258,11 @@
                                         {{ item.title }}
                                     </a>
                                 </h6>
-                                <div class="fw-bold text-teal">₹{{ "{:,.0f}".format(item.price) }}</div>
+                                {% if item.is_sellable %}
+                                    <div class="fw-bold text-primary">₹{{ "{:,.0f}".format(item.price) }}</div>
+                                {% else %}
+                                    <span class="badge badge-mode-borrow">For Borrowing</span>
+                                {% endif %}
                                 <small class="text-muted">{{ item.location }}</small>
                             </div>
                         </div>

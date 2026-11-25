@@ -1,5 +1,8 @@
+from datetime import date
+
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, MultipleFileField
+from wtforms.fields import DateField
 from wtforms import (
     StringField, PasswordField, BooleanField, SubmitField, 
     TextAreaField, SelectField, FloatField, IntegerField, RadioField
@@ -106,6 +109,11 @@ class ListingForm(FlaskForm):
         Length(min=3, max=150, message="Title must be between 3 and 150 characters")
     ])
     category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
+    listing_type = SelectField('Available For', choices=[
+        ('sell_only', 'Sell Only'),
+        ('borrow_only', 'Borrow Only'),
+        ('sell_and_borrow', 'Sell and Borrow')
+    ], default='sell_only', validators=[DataRequired()])
     description = TextAreaField('Detailed Description', validators=[
         DataRequired(), 
         Length(min=10, message="Please write a clear description (at least 10 chars)")
@@ -117,8 +125,8 @@ class ListingForm(FlaskForm):
         ('Used', 'Fair / Well Used (Fully functional)')
     ], validators=[DataRequired()])
     price = FloatField('Your Selling Price (₹)', validators=[
-        DataRequired(), 
-        NumberRange(min=1, message="Price must be at least ₹1")
+        Optional(),
+        NumberRange(min=0, message="Price cannot be negative")
     ])
     original_price = FloatField('Original / MRP Price (₹) [Optional]', validators=[
         Optional(), 
@@ -142,6 +150,24 @@ class ListingForm(FlaskForm):
         FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif'], 'Only image files allowed!')
     ])
     submit = SubmitField('Publish Listing')
+
+    def validate_price(self, field):
+        if self.listing_type.data in {'sell_only', 'sell_and_borrow'} and (field.data is None or field.data < 1):
+            raise ValidationError("Enter a selling price of at least ₹1 for listings available to purchase.")
+
+
+class BorrowRequestForm(FlaskForm):
+    start_date = DateField('Requested Borrowing Start Date', format='%Y-%m-%d', validators=[DataRequired()])
+    expected_return_date = DateField('Expected Return Date', format='%Y-%m-%d', validators=[DataRequired()])
+    submit = SubmitField('Send Borrow Request')
+
+    def validate_start_date(self, field):
+        if field.data and field.data < date.today():
+            raise ValidationError("The borrowing start date cannot be in the past.")
+
+    def validate_expected_return_date(self, field):
+        if field.data and self.start_date.data and field.data <= self.start_date.data:
+            raise ValidationError("The expected return date must be after the borrowing start date.")
 
 
 class OrderRequestForm(FlaskForm):

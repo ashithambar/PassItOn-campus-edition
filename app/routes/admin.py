@@ -164,6 +164,10 @@ def delete_listing(listing_id):
     if not listing:
         abort(404)
         
+    if listing.status in {'reserved', 'borrowed'}:
+        flash("A reserved or borrowed listing cannot be removed until its transaction is resolved.", "warning")
+        return redirect(url_for('admin.listings'))
+
     listing.status = 'deleted'
     db.session.commit()
     flash(f"Listing '{listing.title}' has been removed by admin moderation.", "info")

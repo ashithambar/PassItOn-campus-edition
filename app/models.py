@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -31,6 +31,8 @@ class User(UserMixin, db.Model):
     listings = db.relationship('Listing', back_populates='seller', lazy='dynamic', cascade='all, delete-orphan')
     orders_bought = db.relationship('Order', foreign_keys='Order.buyer_id', back_populates='buyer', lazy='dynamic')
     orders_sold = db.relationship('Order', foreign_keys='Order.seller_id', back_populates='seller', lazy='dynamic')
+    borrow_requests_as_borrower = db.relationship('BorrowRequest', foreign_keys='BorrowRequest.borrower_id', back_populates='borrower', lazy='dynamic')
+    borrow_requests_as_owner = db.relationship('BorrowRequest', foreign_keys='BorrowRequest.owner_id', back_populates='owner', lazy='dynamic')
     wishlist_items = db.relationship('Wishlist', back_populates='user', lazy='dynamic', cascade='all, delete-orphan')
     notifications = db.relationship('Notification', back_populates='user', lazy='dynamic', cascade='all, delete-orphan')
     reviews_written = db.relationship('Review', foreign_keys='Review.reviewer_id', back_populates='reviewer', lazy='dynamic')
@@ -98,7 +100,9 @@ class Listing(db.Model):
     contact_info = db.Column(db.String(120), nullable=True)
     extra_details = db.Column(db.Text, nullable=True)
     
-    # Status: 'available', 'reserved', 'sold', 'deleted'
+    # Listing type: 'sell_only', 'borrow_only', 'sell_and_borrow'
+    listing_type = db.Column(db.String(20), nullable=False, default='sell_only', server_default='sell_only', index=True)
+    # Status: 'available', 'reserved', 'borrowed', 'sold', 'deleted'
     status = db.Column(db.String(20), default='available', index=True)
     views_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
@@ -109,6 +113,12 @@ class Listing(db.Model):
     category = db.relationship('Category', back_populates='listings')
     images = db.relationship('ListingImage', back_populates='listing', cascade='all, delete-orphan', lazy='joined')
     orders = db.relationship('Order', back_populates='listing', lazy='dynamic')
+    borrow_requests = db.relationship(
+        'BorrowRequest',
+        foreign_keys='BorrowRequest.listing_id',
+        back_populates='listing',
+        lazy='dynamic'
+    )
     wishlist_entries = db.relationship('Wishlist', back_populates='listing', cascade='all, delete-orphan', lazy='dynamic')
     reports = db.relationship('Report', back_populates='reported_listing', lazy='dynamic')
 
@@ -126,6 +136,14 @@ class Listing(db.Model):
         if self.original_price and self.original_price > self.price:
             return int(round(((self.original_price - self.price) / self.original_price) * 100))
         return 0
+
+    @property
+    def is_sellable(self):
+        return self.listing_type in {'sell_only', 'sell_and_borrow'}
+
+    @property
+    def is_borrowable(self):
+        return self.listing_type in {'borrow_only', 'sell_and_borrow'}
 
     def __repr__(self):
         return f"<Listing {self.title} - ₹{self.price}>"
@@ -219,6 +237,36 @@ class HandoverRecord(db.Model):
     verified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     
     order = db.relationship('Order', back_populates='handover')
+
+
+class BorrowRequest(db.Model):
+    __tablename__ = 'borrow_requests'
+
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey('listings.id'), nullable=False, index=True)
+    borrower_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    # A unique, nullable key prevents more than one active borrowing request per listing.
+    active_listing_id = db.Column(db.Integer, db.ForeignKey('listings.id'), unique=True, nullable=True)
+    start_date = db.Column(db.Date, nullable=False)
+    expected_return_date = db.Column(db.Date, nullable=False)
+    # 'pending', 'approved', 'borrowed', 'return_requested', 'returned', 'rejected'
+    status = db.Column(db.String(25), nullable=False, default='pending', index=True)
+    return_requested_at = db.Column(db.DateTime, nullable=True)
+    returned_at = db.Column(db.DateTime, nullable=True)
+    return_confirmed_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    listing = db.relationship('Listing', foreign_keys=[listing_id], back_populates='borrow_requests')
+    borrower = db.relationship('User', foreign_keys=[borrower_id], back_populates='borrow_requests_as_borrower')
+    owner = db.relationship('User', foreign_keys=[owner_id], back_populates='borrow_requests_as_owner')
+
+    @property
+    def display_status(self):
+        if self.status in {'borrowed', 'return_requested'} and self.expected_return_date < date.today():
+            return 'overdue'
+        return self.status
 
 
 class Conversation(db.Model):

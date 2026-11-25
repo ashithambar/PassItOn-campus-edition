@@ -166,13 +166,24 @@
                                     </a>
                                 </h6>
 
-                                <div class="d-flex align-items-baseline gap-2 mb-2">
-                                    <span class="fs-5 fw-bold text-teal">₹{{ "{:,.0f}".format(item.price) }}</span>
-                                    {% if item.original_price and item.original_price > item.price %}
-                                        <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
-                                        <span class="badge bg-danger-subtle text-danger small" style="font-size: 0.7rem;">-{{ item.discount_percent }}%</span>
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    {% if item.listing_type == 'sell_only' %}
+                                        <span class="badge badge-mode-sale">For Sale</span>
+                                    {% elif item.listing_type == 'borrow_only' %}
+                                        <span class="badge badge-mode-borrow">For Borrowing</span>
+                                    {% else %}
+                                        <span class="badge badge-mode-both">For Sale & Borrowing</span>
                                     {% endif %}
                                 </div>
+                                {% if item.is_sellable %}
+                                    <div class="d-flex align-items-baseline gap-2 mb-2">
+                                        <span class="fs-5 fw-bold text-primary">₹{{ "{:,.0f}".format(item.price) }}</span>
+                                        {% if item.original_price and item.original_price > item.price %}
+                                            <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
+                                            <span class="badge bg-danger-subtle text-danger small">-{{ item.discount_percent }}%</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
 
                                 <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-muted small" style="font-size: 0.78rem;">
                                     <span class="text-truncate" style="max-width: 130px;">

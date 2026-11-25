@@ -23,7 +23,7 @@
 <body>
 
     <!-- Campus Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-campus sticky-top">
+    <nav class="navbar navbar-expand-xxl navbar-campus sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
                 <div class="brand-badge d-flex align-items-center gap-1">
@@ -43,7 +43,7 @@
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <!-- Search Quick Nav -->
-                <form class="d-flex mx-auto my-2 my-lg-0 col-12 col-lg-5" action="{{ url_for('listings.index') }}" method="GET">
+                <form class="d-flex mx-auto my-2 my-xxl-0 col-12 col-xxl-3" action="{{ url_for('listings.index') }}" method="GET">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
                         <input class="form-control bg-light border-start-0 border-end-0 ps-0" type="search" name="q" placeholder="Search books, calculators, lab coats..." value="{{ request.args.get('q', '') }}">
@@ -51,17 +51,28 @@
                     </div>
                 </form>
 
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-1 gap-lg-2">
+                <ul class="navbar-nav ms-auto align-items-xxl-center gap-1 gap-xxl-2">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('listings.index') }}"><i class="bi bi-grid-fill me-1"></i> Browse</a>
+                        <a class="nav-link {% if request.endpoint == 'listings.index' %}active{% endif %}" href="{{ url_for('listings.index') }}"><i class="bi bi-grid-fill me-1"></i> Browse</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'listings.buy' %}active{% endif %}" href="{{ url_for('listings.buy') }}"><i class="bi bi-bag me-1"></i> Buy Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'borrow.index' %}active{% endif %}" href="{{ url_for('borrow.index') }}"><i class="bi bi-arrow-left-right me-1"></i> Borrow Items</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'dashboard.my_listings' %}active{% endif %}" href="{{ url_for('dashboard.my_listings') }}"><i class="bi bi-tag me-1"></i> My Listings</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.safety') }}"><i class="bi bi-shield-check me-1"></i> Safety</a>
                     </li>
 
                     {% if current_user.is_authenticated %}
                         <!-- Sell Item Button -->
-                        <li class="nav-item my-1 my-lg-0">
+                        <li class="nav-item my-1 my-xxl-0">
                             <a class="btn btn-campus btn-sm d-flex align-items-center gap-1" href="{{ url_for('listings.create') }}">
                                 <i class="bi bi-plus-circle-fill"></i> Sell an Item
                             </a>
@@ -110,7 +121,7 @@
                         </li>
 
                         <!-- User Profile Dropdown -->
-                        <li class="nav-item dropdown ms-lg-2">
+                        <li class="nav-item dropdown ms-xxl-2">
                             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 border rounded-pill pe-3 bg-light" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <img src="{{ url_for('static', filename=current_user.profile_pic) }}" alt="{{ current_user.name }}" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;">
                                 <span class="fw-semibold small text-truncate" style="max-width: 100px;">{{ current_user.name.split()[0] }}</span>
@@ -126,6 +137,8 @@
                                 <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.my_listings') }}"><i class="bi bi-tag me-2 text-success"></i> My Listings</a></li>
                                 <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.requests_received') }}"><i class="bi bi-inbox me-2 text-info"></i> Requests Received</a></li>
                                 <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.my_purchases') }}"><i class="bi bi-bag-check me-2 text-warning"></i> My Purchases</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('borrow.my_borrowings') }}"><i class="bi bi-arrow-left-right me-2 text-primary"></i> My Borrowings</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('borrow.owner_requests') }}"><i class="bi bi-inbox-fill me-2 text-primary"></i> Borrow Requests</a></li>
                                 <li><a class="dropdown-item py-2" href="{{ url_for('dashboard.wishlist') }}"><i class="bi bi-heart me-2 text-danger"></i> Wishlist</a></li>
                                 
                                 {% if current_user.is_admin %}
@@ -206,6 +219,8 @@
                     <h6 class="text-white fw-bold mb-3">Explore</h6>
                     <ul class="list-unstyled small d-flex flex-column gap-2">
                         <li><a href="{{ url_for('listings.index') }}">All Items</a></li>
+                        <li><a href="{{ url_for('listings.buy') }}">Buy Items</a></li>
+                        <li><a href="{{ url_for('borrow.index') }}">Borrow Items</a></li>
                         <li><a href="{{ url_for('listings.index', category='books') }}">Textbooks & Notes</a></li>
                         <li><a href="{{ url_for('listings.index', category='calculators') }}">Calculators</a></li>
                         <li><a href="{{ url_for('listings.index', category='lab-equipment') }}">Lab Equipment</a></li>

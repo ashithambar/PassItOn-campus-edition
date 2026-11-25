@@ -36,6 +36,12 @@
                         {{ form.condition(class="form-select" + (" is-invalid" if form.condition.errors else "")) }}
                     </div>
 
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Available For</label>
+                        {{ form.listing_type(class="form-select" + (" is-invalid" if form.listing_type.errors else "")) }}
+                        {% for error in form.listing_type.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+
                     <div class="col-12">
                         <label class="form-label small fw-semibold">Description</label>
                         {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4) }}
@@ -43,7 +49,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label small fw-semibold">Selling Price (₹)</label>
+                        <label class="form-label small fw-semibold">Selling Price (₹) (required when available to buy)</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light">₹</span>
                             {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else "")) }}

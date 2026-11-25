@@ -88,6 +88,7 @@ def create_app(config_class=Config):
     from app.routes.chat import chat_bp
     from app.routes.dashboard import dashboard_bp
     from app.routes.admin import admin_bp
+    from app.routes.borrow import borrow_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
@@ -96,5 +97,6 @@ def create_app(config_class=Config):
     app.register_blueprint(chat_bp, url_prefix='/chat')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(borrow_bp, url_prefix='/borrow')
 
     return app

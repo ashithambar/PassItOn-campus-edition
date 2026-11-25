@@ -33,6 +33,10 @@
                                     <span class="badge bg-warning text-dark">
                                         <i class="bi bi-clock-fill me-1"></i> RESERVED
                                     </span>
+                                {% elif item.status == 'borrowed' %}
+                                    <span class="badge badge-status-borrowed">
+                                        <i class="bi bi-arrow-left-right me-1"></i> BORROWED
+                                    </span>
                                 {% else %}
                                     <span class="badge bg-success">Available</span>
                                 {% endif %}
@@ -57,12 +61,14 @@
                                 </a>
                             </h6>
 
+                            {% if item.is_sellable %}
                             <div class="d-flex align-items-baseline gap-2 mb-2">
                                 <span class="fs-5 fw-bold text-teal">₹{{ "{:,.0f}".format(item.price) }}</span>
                                 {% if item.original_price and item.original_price > item.price %}
                                     <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
                                 {% endif %}
                             </div>
+                            {% endif %}
 
                             <div class="small text-muted mb-2">
                                 Seller: <strong>{{ item.seller.name }}</strong> ({{ item.seller.department }})
@@ -72,9 +78,14 @@
                                 <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="btn btn-sm btn-campus flex-grow-1">
                                     View Item
                                 </a>
-                                {% if item.status == 'available' %}
+                                {% if item.status == 'available' and item.is_sellable %}
                                     <a href="{{ url_for('orders.request_item', listing_id=item.id) }}" class="btn btn-sm btn-outline-success">
                                         Buy
+                                    </a>
+                                {% endif %}
+                                {% if item.status == 'available' and item.is_borrowable %}
+                                    <a href="{{ url_for('borrow.request_item', listing_id=item.id) }}" class="btn btn-sm btn-campus-outline">
+                                        Borrow
                                     </a>
                                 {% endif %}
                             </div>

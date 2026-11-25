@@ -10,34 +10,34 @@
 {% block content %}
 <div class="py-3">
     <!-- Admin Sub-Navigation Header -->
-    <div class="card card-campus border-0 shadow-sm p-3 mb-4 bg-dark text-white">
+    <div class="card card-campus admin-dashboard-header p-3 mb-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div class="d-flex align-items-center gap-2">
                 <span class="badge bg-danger px-3 py-2 fs-6"><i class="bi bi-shield-lock-fill me-1"></i> Admin Console</span>
                 <div>
-                    <h5 class="fw-bold mb-0 text-white">PassItOn Campus Administration</h5>
-                    <small class="text-white-50">Apex Institute of Technology Community Oversight</small>
+                    <h5 class="fw-bold mb-0">PassItOn Campus Administration</h5>
+                    <small class="text-muted">Apex Institute of Technology Community Oversight</small>
                 </div>
             </div>
 
             <!-- Admin Tabs -->
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ url_for('admin.index') }}" class="btn btn-sm btn-light fw-semibold">
+                <a href="{{ url_for('admin.index') }}" class="btn btn-sm btn-campus fw-semibold">
                     <i class="bi bi-speedometer2 me-1"></i> Overview
                 </a>
-                <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-light">
+                <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-campus-outline">
                     <i class="bi bi-people-fill me-1"></i> Users
                 </a>
-                <a href="{{ url_for('admin.listings') }}" class="btn btn-sm btn-outline-light">
+                <a href="{{ url_for('admin.listings') }}" class="btn btn-sm btn-campus-outline">
                     <i class="bi bi-tag-fill me-1"></i> Listings
                 </a>
-                <a href="{{ url_for('admin.transactions') }}" class="btn btn-sm btn-outline-light">
+                <a href="{{ url_for('admin.transactions') }}" class="btn btn-sm btn-campus-outline">
                     <i class="bi bi-receipt me-1"></i> Transactions
                 </a>
-                <a href="{{ url_for('admin.categories') }}" class="btn btn-sm btn-outline-light">
+                <a href="{{ url_for('admin.categories') }}" class="btn btn-sm btn-campus-outline">
                     <i class="bi bi-grid-fill me-1"></i> Categories
                 </a>
-                <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-outline-light position-relative">
+                <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-campus-outline position-relative">
                     <i class="bi bi-flag-fill me-1"></i> Reports
                     {% if pending_reports > 0 %}
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">

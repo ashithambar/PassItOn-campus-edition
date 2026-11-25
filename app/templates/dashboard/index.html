@@ -7,66 +7,50 @@
     <!-- Header -->
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4 pb-2 border-bottom">
         <div>
-            <h3 class="fw-bold mb-1">Student Dashboard</h3>
-            <p class="text-muted small mb-0">Welcome, {{ current_user.name }} ({{ current_user.department }})</p>
+            <h2 class="fw-bold mb-1">Your Campus Dashboard</h2>
+            <p class="text-muted small mb-0">Welcome back, {{ current_user.name }} · {{ current_user.department }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ url_for('listings.create') }}" class="btn btn-campus btn-sm">
                 <i class="bi bi-plus-circle-fill me-1"></i> Sell an Item
             </a>
-            <a href="{{ url_for('listings.index') }}" class="btn btn-campus-outline btn-sm">
-                <i class="bi bi-search me-1"></i> Browse Items
+            <a href="{{ url_for('borrow.index') }}" class="btn btn-campus-outline btn-sm">
+                <i class="bi bi-arrow-left-right me-1"></i> Borrow Items
             </a>
         </div>
     </div>
 
-    <!-- Quick Stats Cards (Feature 13) -->
-    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 mb-4">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
         <div class="col">
             <div class="card card-campus border-0 shadow-sm p-3 text-center h-100">
-                <div class="fs-4 fw-bold text-teal">{{ active_listings_count }}</div>
-                <div class="small text-muted fw-semibold">Active Listings</div>
+                <div class="category-icon-box"><i class="bi bi-tags"></i></div>
+                <div class="fs-4 fw-bold text-primary">{{ active_listings_count }}</div>
+                <div class="small text-muted fw-semibold">Available Listings</div>
                 <a href="{{ url_for('dashboard.my_listings', status='available') }}" class="stretched-link"></a>
             </div>
         </div>
-
         <div class="col">
             <div class="card card-campus border-0 shadow-sm p-3 text-center h-100">
-                <div class="fs-4 fw-bold text-success">{{ sold_listings_count }}</div>
-                <div class="small text-muted fw-semibold">Items Sold</div>
-                <a href="{{ url_for('dashboard.my_listings', status='sold') }}" class="stretched-link"></a>
+                <div class="category-icon-box bg-teal-subtle"><i class="bi bi-arrow-left-right"></i></div>
+                <div class="fs-4 fw-bold text-primary">{{ my_active_borrowings_count }}</div>
+                <div class="small text-muted fw-semibold">Active Borrowings</div>
+                <a href="{{ url_for('borrow.my_borrowings') }}" class="stretched-link"></a>
             </div>
         </div>
-
         <div class="col">
             <div class="card card-campus border-0 shadow-sm p-3 text-center h-100">
+                <div class="category-icon-box"><i class="bi bi-inbox"></i></div>
                 <div class="fs-4 fw-bold text-primary">{{ requests_received|length }}</div>
-                <div class="small text-muted fw-semibold">Requests Received</div>
+                <div class="small text-muted fw-semibold">Purchase Requests</div>
                 <a href="{{ url_for('dashboard.requests_received') }}" class="stretched-link"></a>
             </div>
         </div>
-
         <div class="col">
             <div class="card card-campus border-0 shadow-sm p-3 text-center h-100">
-                <div class="fs-4 fw-bold text-warning text-dark">{{ my_purchases|length }}</div>
-                <div class="small text-muted fw-semibold">My Purchases</div>
-                <a href="{{ url_for('dashboard.my_purchases') }}" class="stretched-link"></a>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card card-campus border-0 shadow-sm p-3 text-center h-100">
-                <div class="fs-4 fw-bold text-danger">{{ wishlist_count }}</div>
-                <div class="small text-muted fw-semibold">Wishlisted Items</div>
-                <a href="{{ url_for('dashboard.wishlist') }}" class="stretched-link"></a>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card card-campus border-0 shadow-sm p-3 text-center h-100">
-                <div class="fs-4 fw-bold text-dark">{{ "%.1f"|format(avg_rating) }} ★</div>
-                <div class="small text-muted fw-semibold">{{ rating_count }} Reviews</div>
-                <a href="{{ url_for('auth.profile') }}" class="stretched-link"></a>
+                <div class="category-icon-box"><i class="bi bi-arrow-down-left-circle"></i></div>
+                <div class="fs-4 fw-bold text-primary">{{ pending_borrow_requests_count }}</div>
+                <div class="small text-muted fw-semibold">Borrow Requests</div>
+                <a href="{{ url_for('borrow.owner_requests') }}" class="stretched-link"></a>
             </div>
         </div>
     </div>

@@ -1,7 +1,7 @@
 import math
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, abort
 from flask_login import login_required, current_user
-from app.models import db, Listing, ListingImage, Category, User, Wishlist, Report
+from app.models import db, Listing, ListingImage, Category, User, Wishlist, Report, Order, HandoverRecord
 from app.forms import ListingForm, ReportForm
 from app.utils import save_uploaded_file, calculate_smart_price
 
@@ -115,6 +115,52 @@ def index():
     )
 
 
+@listings_bp.route('/buy')
+def buy():
+    query_text = request.args.get('q', '').strip()
+    category_slug = request.args.get('category', '').strip()
+    condition = request.args.get('condition', '').strip()
+    sort_by = request.args.get('sort', 'newest')
+    query = Listing.query.filter_by(status='available').filter(
+        Listing.listing_type.in_(['sell_only', 'sell_and_borrow'])
+    )
+
+    if query_text:
+        query = query.filter(db.or_(
+            Listing.title.ilike(f'%{query_text}%'),
+            Listing.description.ilike(f'%{query_text}%'),
+            Listing.location.ilike(f'%{query_text}%')
+        ))
+
+    if condition in {'New', 'Like New', 'Good', 'Used'}:
+        query = query.filter(Listing.condition == condition)
+
+    selected_category = None
+    if category_slug:
+        selected_category = Category.query.filter_by(slug=category_slug).first()
+        if selected_category:
+            query = query.filter(Listing.category_id == selected_category.id)
+
+    if sort_by == 'price_asc':
+        query = query.order_by(Listing.price.asc())
+    elif sort_by == 'price_desc':
+        query = query.order_by(Listing.price.desc())
+    else:
+        query = query.order_by(Listing.created_at.desc())
+
+    pagination = query.paginate(page=request.args.get('page', 1, type=int), per_page=12, error_out=False)
+    return render_template(
+        'listings/buy.html',
+        listings=pagination.items,
+        pagination=pagination,
+        categories=Category.query.order_by(Category.name).all(),
+        query_text=query_text,
+        current_condition=condition,
+        selected_category=selected_category,
+        current_sort=sort_by
+    )
+
+
 @listings_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create():
@@ -130,10 +176,11 @@ def create():
         listing = Listing(
             seller_id=current_user.id,
             category_id=form.category_id.data,
+            listing_type=form.listing_type.data,
             title=form.title.data.strip(),
             description=form.description.data.strip(),
             condition=form.condition.data,
-            price=float(form.price.data),
+            price=float(form.price.data) if form.price.data is not None else 0.0,
             original_price=float(form.original_price.data) if form.original_price.data else None,
             item_age_months=int(form.item_age_months.data) if form.item_age_months.data else 0,
             location=form.location.data.strip(),
@@ -257,11 +304,16 @@ def edit(listing_id):
     form.category_id.choices = [(c.id, c.name) for c in categories]
     
     if form.validate_on_submit():
+        if listing.status in {'reserved', 'borrowed'} and form.listing_type.data != listing.listing_type:
+            flash("The listing type cannot change while an item is reserved or borrowed.", "warning")
+            return render_template('listings/edit.html', form=form, listing=listing, categories=categories)
+
         listing.title = form.title.data.strip()
         listing.category_id = form.category_id.data
+        listing.listing_type = form.listing_type.data
         listing.description = form.description.data.strip()
         listing.condition = form.condition.data
-        listing.price = float(form.price.data)
+        listing.price = float(form.price.data) if form.price.data is not None else 0.0
         listing.original_price = float(form.original_price.data) if form.original_price.data else None
         listing.item_age_months = int(form.item_age_months.data) if form.item_age_months.data else 0
         listing.location = form.location.data.strip()
@@ -294,7 +346,11 @@ def delete(listing_id):
     if listing.seller_id != current_user.id and not current_user.is_admin:
         flash("Unauthorized action.", "danger")
         return redirect(url_for('main.index'))
-        
+
+    if listing.status in {'reserved', 'borrowed'}:
+        flash("A reserved or borrowed item cannot be deleted until its transaction is resolved.", "warning")
+        return redirect(url_for('dashboard.my_listings'))
+
     listing.status = 'deleted'
     db.session.commit()
     flash(f"Listing '{listing.title}' has been deleted.", "info")
@@ -307,7 +363,16 @@ def mark_sold(listing_id):
     listing = db.session.get(Listing, listing_id)
     if not listing or (listing.seller_id != current_user.id and not current_user.is_admin):
         abort(403)
-        
+
+    verified_sale = Order.query.join(HandoverRecord).filter(
+        Order.listing_id == listing.id,
+        Order.status == 'completed',
+        HandoverRecord.is_used.is_(True)
+    ).first()
+    if listing.status != 'available' or not listing.is_sellable or not verified_sale:
+        flash("Items can only be marked as Sold after a completed, verified handover.", "warning")
+        return redirect(url_for('listings.detail', listing_id=listing.id))
+
     listing.status = 'sold'
     db.session.commit()
     flash("Item marked as Sold.", "success")

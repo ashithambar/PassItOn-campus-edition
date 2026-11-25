@@ -9,6 +9,8 @@
   --campus-rose-pink: #DA627D;
   --campus-dark-rose: #A53860;
   --campus-deep-burgundy: #450920;
+  --campus-teal: #8EC2CE;
+  --campus-page-bg: #FEFCFB;
   --campus-primary: var(--campus-rose-pink);
   --campus-primary-hover: var(--campus-deep-burgundy);
   --campus-primary-light: var(--campus-soft-pink);
@@ -36,7 +38,7 @@
   --bs-light: #FFFFFF;
   --bs-light-rgb: 255, 255, 255;
   --bs-body-color: #450920;
-  --bs-body-bg: #FFFFFF;
+  --bs-body-bg: #FEFCFB;
   --bs-border-color: #FFA5AB;
   --bs-secondary-color: rgba(69, 9, 32, 0.72);
   --bs-link-color: #A53860;
@@ -48,11 +50,15 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: var(--campus-white);
+  background-color: var(--campus-page-bg);
   color: var(--campus-deep-burgundy);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--campus-deep-burgundy);
 }
 
 main {
@@ -63,7 +69,11 @@ main {
 .navbar-campus {
   background: var(--campus-white);
   border-bottom: 2px solid var(--campus-border);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 18px rgba(69, 9, 32, 0.06);
+}
+
+.navbar-campus .navbar-nav {
+  align-items: center;
 }
 
 .brand-badge {
@@ -85,17 +95,36 @@ main {
   font-weight: 500;
   color: var(--campus-deep-burgundy) !important;
   transition: color 0.15s ease;
+  position: relative;
 }
 
 .nav-link:hover, .nav-link.active {
   color: var(--campus-dark-rose) !important;
 }
 
+.navbar-campus .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.2rem;
+  height: 2px;
+  background: var(--campus-rose-pink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.18s ease;
+}
+
+.navbar-campus .nav-link:hover::after,
+.navbar-campus .nav-link.active::after {
+  transform: scaleX(1);
+}
+
 .btn-campus {
   background-color: var(--campus-dark-rose);
   color: var(--campus-white);
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   padding: 8px 18px;
   transition: all 0.2s;
@@ -113,7 +142,7 @@ main {
   color: var(--campus-dark-rose);
   background: transparent;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 7px 16px;
   transition: all 0.2s;
 }
@@ -141,13 +170,14 @@ main {
 
 /* Hero Section */
 .hero-banner {
-  background: linear-gradient(135deg, var(--campus-deep-burgundy) 0%, var(--campus-dark-rose) 100%);
-  color: var(--campus-white);
-  border-radius: 20px;
-  padding: 48px 36px;
+  background: linear-gradient(115deg, var(--campus-white) 0%, #FFF5F5 68%, #FDE8EA 100%);
+  color: var(--campus-deep-burgundy);
+  border: 1px solid rgba(165, 56, 96, 0.12);
+  border-radius: 24px;
+  padding: clamp(28px, 5vw, 64px);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(69, 9, 32, 0.22);
+  box-shadow: 0 16px 40px -28px rgba(69, 9, 32, 0.28);
 }
 
 .hero-banner::after {
@@ -157,7 +187,7 @@ main {
   right: -50px;
   width: 250px;
   height: 250px;
-  background: rgba(255, 165, 171, 0.16);
+  background: rgba(255, 165, 171, 0.22);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -165,9 +195,9 @@ main {
 /* Cards */
 .card-campus {
   background: var(--campus-white);
-  border: 1px solid var(--campus-border);
-  border-radius: 14px;
-  box-shadow: var(--campus-card-shadow);
+  border: 1px solid rgba(165, 56, 96, 0.13);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(69, 9, 32, 0.045);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;
 }
@@ -253,33 +283,51 @@ main {
 }
 
 .badge-status-available {
-  background-color: var(--campus-soft-pink);
+  background-color: var(--campus-teal);
   color: var(--campus-deep-burgundy);
-  border: 1px solid var(--campus-rose-pink);
+  border: 1px solid #6FAAB8;
 }
 
 .badge-status-reserved {
-  background-color: var(--campus-rose-pink);
+  background-color: var(--campus-soft-pink);
   color: var(--campus-deep-burgundy);
   border: 1px solid var(--campus-dark-rose);
 }
 
 .badge-status-sold {
-  background-color: var(--campus-white);
+  background-color: #F7DCE2;
   color: var(--campus-deep-burgundy);
-  border: 1px solid var(--campus-soft-pink);
+  border: 1px solid var(--campus-rose-pink);
+}
+
+.badge-status-borrowed,
+.badge-mode-borrow {
+  background-color: var(--campus-teal);
+  color: var(--campus-deep-burgundy);
+  border: 1px solid #6FAAB8;
+}
+
+.badge-mode-sale {
+  background-color: var(--campus-rose-pink);
+  color: var(--campus-white);
+}
+
+.badge-mode-both {
+  background-color: var(--campus-deep-burgundy);
+  color: var(--campus-white);
 }
 
 /* Category Pill Card */
 .category-card {
   background: var(--campus-white);
-  border: 1px solid var(--campus-border);
-  border-radius: 12px;
-  padding: 16px 12px;
+  border: 1px solid rgba(165, 56, 96, 0.14);
+  border-radius: 16px;
+  padding: 20px 12px;
   text-align: center;
   text-decoration: none;
   color: var(--campus-deep-burgundy);
-  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(69, 9, 32, 0.035);
+  transition: border-color 0.2s, background-color 0.2s, transform 0.2s, box-shadow 0.2s;
   display: block;
 }
 
@@ -291,12 +339,28 @@ main {
   color: var(--campus-deep-burgundy);
 }
 
+.marketplace-overview {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  background: var(--campus-white);
+  border: 1px solid rgba(165, 56, 96, 0.12);
+  box-shadow: 0 6px 20px rgba(69, 9, 32, 0.04);
+  color: var(--campus-deep-burgundy);
+}
+
+.overview-number {
+  color: var(--campus-dark-rose);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
 .category-icon-box {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background-color: var(--campus-primary-light);
-  color: var(--campus-primary);
+  background-color: #FFF0F1;
+  color: var(--campus-dark-rose);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -521,6 +585,217 @@ main {
   color: var(--campus-white);
 }
 
+.hero-tagline {
+  color: var(--campus-dark-rose);
+  font-size: clamp(1.05rem, 2vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.hero-art {
+  position: relative;
+  min-height: 270px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,165,171,0.36));
+  border: 1px solid rgba(165,56,96,0.12);
+  overflow: hidden;
+}
+
+.hero-art::before,
+.hero-art::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(142,194,206,0.36);
+}
+
+.hero-art::before {
+  width: 150px;
+  height: 150px;
+  right: -30px;
+  top: -40px;
+}
+
+.hero-art::after {
+  width: 100px;
+  height: 100px;
+  left: -24px;
+  bottom: -28px;
+}
+
+.hero-object {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  color: var(--campus-deep-burgundy);
+  background: var(--campus-white);
+  border: 1px solid rgba(165,56,96,0.12);
+  border-radius: 20px;
+  box-shadow: 0 14px 28px rgba(69,9,32,0.12);
+}
+
+.hero-object i {
+  font-size: 3rem;
+}
+
+.hero-object-book {
+  width: 112px;
+  height: 132px;
+  left: 14%;
+  top: 17%;
+  transform: rotate(-8deg);
+  color: var(--campus-dark-rose);
+}
+
+.hero-object-calculator {
+  width: 96px;
+  height: 116px;
+  left: 42%;
+  top: 31%;
+  transform: rotate(5deg);
+  color: #477C89;
+}
+
+.hero-object-bag {
+  width: 116px;
+  height: 124px;
+  right: 10%;
+  top: 15%;
+  transform: rotate(7deg);
+  color: var(--campus-rose-pink);
+}
+
+.hero-art-caption {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  color: var(--campus-deep-burgundy);
+  background: rgba(255,255,255,0.86);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.marketplace-card-image {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  object-fit: cover;
+  background: #FFF0F1;
+}
+
+.borrow-promo {
+  background: linear-gradient(110deg, #F0FAFB, #FFFFFF);
+  border: 1px solid rgba(71, 124, 137, 0.2);
+  border-radius: 20px;
+}
+
+.admin-dashboard-header {
+  background: linear-gradient(110deg, #FFFFFF, #FFF1F2);
+  border: 1px solid rgba(165, 56, 96, 0.14);
+}
+
+.borrow-promo .promo-icon {
+  color: #477C89;
+  background: rgba(142,194,206,0.32);
+  border-radius: 16px;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  font-size: 1.45rem;
+}
+
+.table {
+  --bs-table-color: var(--campus-deep-burgundy);
+  --bs-table-hover-bg: #FFF5F5;
+}
+
+.table thead th {
+  color: var(--campus-dark-rose);
+  font-weight: 600;
+  border-bottom-color: var(--campus-soft-pink);
+}
+
+.form-control,
+.form-select {
+  border-color: rgba(165,56,96,0.2);
+  border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--campus-dark-rose);
+  box-shadow: 0 0 0 0.2rem rgba(165,56,96,0.13);
+}
+
+.card:not(.card-campus) {
+  border-color: rgba(165, 56, 96, 0.13);
+  border-radius: 18px;
+}
+
+.table-responsive {
+  border-radius: 14px;
+  border-color: rgba(165, 56, 96, 0.14) !important;
+}
+
+.alert {
+  border-radius: 12px;
+}
+
+.pagination {
+  --bs-pagination-color: var(--campus-dark-rose);
+  --bs-pagination-hover-color: var(--campus-deep-burgundy);
+  --bs-pagination-hover-bg: #FFF0F1;
+  --bs-pagination-active-bg: var(--campus-dark-rose);
+  --bs-pagination-active-border-color: var(--campus-dark-rose);
+  --bs-pagination-border-color: rgba(165, 56, 96, 0.18);
+}
+
+@media (max-width: 1399.98px) {
+  .navbar-campus .navbar-nav {
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero-banner {
+    border-radius: 18px;
+  }
+
+  .hero-art {
+    min-height: 215px;
+  }
+
+  .hero-object-book {
+    width: 82px;
+    height: 104px;
+    left: 9%;
+  }
+
+  .hero-object-calculator {
+    width: 76px;
+    height: 94px;
+    left: 39%;
+  }
+
+  .hero-object-bag {
+    width: 84px;
+    height: 98px;
+    right: 8%;
+  }
+
+  .hero-object i {
+    font-size: 2.4rem;
+  }
+
+  .hero-art-caption {
+    font-size: 0.7rem;
+  }
+}
+
 /* Bootstrap utilities share the same palette as custom components. */
 .text-teal,
 .text-primary,
@@ -536,14 +811,17 @@ main {
   color: var(--campus-deep-burgundy) !important;
 }
 
-.bg-teal-subtle,
+.bg-teal-subtle {
+  background-color: rgba(142, 194, 206, 0.4) !important;
+}
+
 .bg-primary-subtle,
 .bg-secondary-subtle,
 .bg-success-subtle,
 .bg-info-subtle,
 .bg-warning-subtle,
 .bg-danger-subtle {
-  background-color: var(--campus-soft-pink) !important;
+  background-color: #FFF0F1 !important;
 }
 
 .bg-primary,

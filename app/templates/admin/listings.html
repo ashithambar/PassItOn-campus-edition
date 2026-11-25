@@ -30,6 +30,7 @@
         <a href="{{ url_for('admin.listings', status='all', q=search) }}" class="btn btn-sm {% if current_status == 'all' %}btn-dark{% else %}btn-outline-secondary{% endif %}">All</a>
         <a href="{{ url_for('admin.listings', status='available', q=search) }}" class="btn btn-sm {% if current_status == 'available' %}btn-campus{% else %}btn-outline-secondary{% endif %}">Available</a>
         <a href="{{ url_for('admin.listings', status='reserved', q=search) }}" class="btn btn-sm {% if current_status == 'reserved' %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}">Reserved</a>
+        <a href="{{ url_for('admin.listings', status='borrowed', q=search) }}" class="btn btn-sm {% if current_status == 'borrowed' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Borrowed</a>
         <a href="{{ url_for('admin.listings', status='sold', q=search) }}" class="btn btn-sm {% if current_status == 'sold' %}btn-success{% else %}btn-outline-secondary{% endif %}">Sold</a>
         <a href="{{ url_for('admin.listings', status='deleted', q=search) }}" class="btn btn-sm {% if current_status == 'deleted' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Deleted</a>
     </div>
@@ -79,6 +80,8 @@
                                 <span class="badge badge-status-reserved">Reserved</span>
                             {% elif item.status == 'sold' %}
                                 <span class="badge badge-status-sold">Sold</span>
+                            {% elif item.status == 'borrowed' %}
+                                <span class="badge badge-status-borrowed">Borrowed</span>
                             {% elif item.status == 'deleted' %}
                                 <span class="badge bg-danger">Deleted</span>
                             {% endif %}

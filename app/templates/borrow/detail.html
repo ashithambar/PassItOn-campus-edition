@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Borrow Request – {{ borrow_request.listing.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+    <div class="col-lg-8">
+        <div class="card card-campus border-0 shadow-sm p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                <div>
+                    <h2 class="fw-bold mb-1">{{ borrow_request.listing.title }}</h2>
+                    <div class="text-muted">{{ borrow_request.listing.category.name }} · {{ borrow_request.listing.condition }}</div>
+                </div>
+                <span class="badge bg-primary-subtle text-dark fs-6">{{ borrow_request.display_status|replace('_', ' ')|capitalize }}</span>
+            </div>
+            <p>{{ borrow_request.listing.description }}</p>
+            <dl class="row">
+                <dt class="col-sm-4">Owner</dt><dd class="col-sm-8">{{ borrow_request.owner.name }}</dd>
+                <dt class="col-sm-4">Borrower</dt><dd class="col-sm-8">{{ borrow_request.borrower.name }}</dd>
+                <dt class="col-sm-4">Location</dt><dd class="col-sm-8">{{ borrow_request.listing.location }}</dd>
+                <dt class="col-sm-4">Borrowing start</dt><dd class="col-sm-8">{{ borrow_request.start_date.strftime('%d %b %Y') }}</dd>
+                <dt class="col-sm-4">Expected return</dt><dd class="col-sm-8">{{ borrow_request.expected_return_date.strftime('%d %b %Y') }}</dd>
+                {% if borrow_request.return_requested_at %}
+                    <dt class="col-sm-4">Return requested</dt><dd class="col-sm-8">{{ borrow_request.return_requested_at.strftime('%d %b %Y %H:%M') }}</dd>
+                {% endif %}
+                {% if borrow_request.return_confirmed_at %}
+                    <dt class="col-sm-4">Return confirmed</dt><dd class="col-sm-8">{{ borrow_request.return_confirmed_at.strftime('%d %b %Y %H:%M') }}</dd>
+                {% endif %}
+            </dl>
+
+            {% if current_user.id == borrow_request.owner_id or current_user.is_admin %}
+                <div class="d-flex flex-wrap gap-2 border-top pt-3">
+                    {% if borrow_request.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('borrow.accept', borrow_request_id=borrow_request.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-campus" type="submit">Approve Request</button></form>
+                        <form method="POST" action="{{ url_for('borrow.reject', borrow_request_id=borrow_request.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-danger" type="submit">Reject</button></form>
+                    {% elif borrow_request.status == 'approved' %}
+                        <form method="POST" action="{{ url_for('borrow.mark_borrowed', borrow_request_id=borrow_request.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-campus" type="submit">Confirm Handover / Mark Borrowed</button></form>
+                    {% elif borrow_request.status == 'return_requested' %}
+                        <form method="POST" action="{{ url_for('borrow.confirm_return', borrow_request_id=borrow_request.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-campus" type="submit">Confirm Item Returned</button></form>
+                    {% endif %}
+                </div>
+            {% elif current_user.id == borrow_request.borrower_id and borrow_request.status == 'borrowed' %}
+                <form class="border-top pt-3" method="POST" action="{{ url_for('borrow.request_return', borrow_request_id=borrow_request.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-campus" type="submit">Request Return Confirmation</button></form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

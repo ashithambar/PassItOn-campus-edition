@@ -1,4 +1,5 @@
 from app import create_app
+from app.migrations import upgrade_schema
 from app.models import Category, User, db
 
 app = create_app()
@@ -21,6 +22,7 @@ CATEGORIES = [
 def seed_database():
     with app.app_context():
         db.create_all()
+        upgrade_schema()
 
         existing_slugs = {category.slug for category in Category.query.all()}
         for name, slug, icon, description in CATEGORIES:

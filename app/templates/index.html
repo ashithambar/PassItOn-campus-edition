@@ -3,98 +3,44 @@
 {% block title %}PassItOn – Campus Edition | Student Marketplace{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
 <section class="hero-banner mb-5">
-    <div class="row align-items-center">
-        <div class="col-lg-7 mb-4 mb-lg-0">
-            <span class="badge bg-white text-teal px-3 py-2 rounded-pill fw-bold text-uppercase mb-3" style="letter-spacing: 1px;">
-                <i class="bi bi-mortarboard-fill me-1"></i> Apex Campus Marketplace
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="badge rounded-pill bg-white text-primary border px-3 py-2 mb-3">
+                <i class="bi bi-mortarboard-fill me-1"></i> PassItOn Campus Community
             </span>
-            <h1 class="display-5 fw-extrabold text-white mb-3" style="line-height: 1.15;">
-                One student's unused item becomes another student's useful item.
-            </h1>
-            <p class="lead text-white-50 mb-4" style="font-size: 1.1rem;">
-                Buy and sell textbooks, scientific calculators, lab coats, drafters, cycle locks, and hostel essentials directly with verified students on campus.
-            </p>
+            <h1 class="display-4 fw-bold mb-2">PassItOn</h1>
+            <div class="hero-tagline mb-3">Buy <span aria-hidden="true">•</span> Sell <span aria-hidden="true">•</span> Borrow</div>
+            <p class="lead text-secondary mb-4">A sustainable campus community for students, by students.</p>
             <div class="d-flex flex-wrap gap-3">
-                <a href="{{ url_for('listings.create') }}" class="btn btn-campus-accent btn-lg px-4 d-flex align-items-center gap-2">
-                    <i class="bi bi-plus-circle-fill"></i> Sell an Item
+                <a href="{{ url_for('listings.buy') }}" class="btn btn-campus btn-lg px-4">
+                    <i class="bi bi-search me-2"></i>Explore Items
                 </a>
-                <a href="{{ url_for('listings.index') }}" class="btn btn-outline-light btn-lg px-4 d-flex align-items-center gap-2">
-                    <i class="bi bi-search"></i> Browse All Items
+                <a href="{{ url_for('listings.create') }}" class="btn btn-campus-outline btn-lg px-4">
+                    <i class="bi bi-plus-circle me-2"></i>Post an Item
                 </a>
+                <a href="{{ url_for('borrow.index') }}" class="btn btn-link fw-semibold text-decoration-none">Borrow something <i class="bi bi-arrow-right"></i></a>
             </div>
         </div>
-
         <div class="col-lg-5">
-            <!-- Quick Search Card inside Hero -->
-            <div class="card bg-white text-dark border-0 rounded-4 shadow p-4">
-                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-funnel-fill text-teal"></i> Find What You Need
-                </h5>
-                <form action="{{ url_for('listings.index') }}" method="GET">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-muted">What are you looking for?</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                            <input type="text" name="q" class="form-control border-start-0" placeholder="e.g. Casio fx-991EX, B.S. Grewal...">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-muted">Campus Category</label>
-                        <select name="category" class="form-select">
-                            <option value="">All Campus Categories</option>
-                            {% for c in categories %}
-                                <option value="{{ c.slug }}">{{ c.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold text-muted">Condition</label>
-                            <select name="condition" class="form-select form-select-sm">
-                                <option value="">Any Condition</option>
-                                <option value="New">Brand New</option>
-                                <option value="Like New">Like New</option>
-                                <option value="Good">Good</option>
-                                <option value="Used">Used</option>
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-semibold text-muted">Max Budget (₹)</label>
-                            <input type="number" name="max_price" class="form-control form-control-sm" placeholder="₹ Any">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-campus w-100 py-2 fw-bold">
-                        <i class="bi bi-arrow-right-circle me-1"></i> Search Campus Items
-                    </button>
-                </form>
+            <div class="hero-art" role="img" aria-label="Illustration of books, a calculator, and a campus backpack">
+                <div class="hero-object hero-object-book"><i class="bi bi-book-half"></i></div>
+                <div class="hero-object hero-object-calculator"><i class="bi bi-calculator-fill"></i></div>
+                <div class="hero-object hero-object-bag"><i class="bi bi-backpack-fill"></i></div>
+                <div class="hero-art-caption">Useful things, shared around campus</div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Campus Stats Bar -->
-<section class="mb-5">
-    <div class="card card-campus border-0 shadow-sm p-3">
-        <div class="row text-center g-3">
-            <div class="col-6 col-md-3 border-end">
-                <div class="fs-3 fw-bold text-teal">{{ total_students }}</div>
-                <div class="small text-muted fw-semibold">Active Students</div>
-            </div>
-            <div class="col-6 col-md-3 border-end-md">
-                <div class="fs-3 fw-bold text-teal">{{ total_listings }}</div>
-                <div class="small text-muted fw-semibold">Campus Listings</div>
-            </div>
-            <div class="col-6 col-md-3 border-end">
-                <div class="fs-3 fw-bold text-teal">{{ total_sold }}</div>
-                <div class="small text-muted fw-semibold">Items Reused & Sold</div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="fs-3 fw-bold text-teal">100%</div>
-                <div class="small text-muted fw-semibold">Zero Commission</div>
-            </div>
-        </div>
+<section class="marketplace-overview d-flex flex-wrap justify-content-center gap-4 mb-5 py-3 px-4 rounded-4">
+    <div class="d-flex align-items-center gap-2">
+        <div class="overview-number">{{ total_listings }}</div>
+        <div class="small fw-semibold">campus listings</div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="overview-number">{{ total_students }}</div>
+        <div class="small fw-semibold">student community members</div>
     </div>
 </section>
 
@@ -167,8 +113,15 @@
                         </div>
 
                         <div class="card-body p-3 d-flex flex-column">
-                            <div class="small text-muted text-uppercase mb-1" style="font-size: 0.7rem; font-weight: 600;">
-                                {{ item.category.name }}
+                            <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center mb-2">
+                                <span class="small text-muted text-uppercase fw-semibold">{{ item.category.name }}</span>
+                                {% if item.listing_type == 'sell_only' %}
+                                    <span class="badge badge-mode-sale">For Sale</span>
+                                {% elif item.listing_type == 'borrow_only' %}
+                                    <span class="badge badge-mode-borrow">For Borrowing</span>
+                                {% else %}
+                                    <span class="badge badge-mode-both">For Sale & Borrowing</span>
+                                {% endif %}
                             </div>
                             <h6 class="card-title fw-bold mb-2">
                                 <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="text-decoration-none text-dark stretched-link">
@@ -176,13 +129,15 @@
                                 </a>
                             </h6>
 
+                            {% if item.is_sellable %}
                             <div class="d-flex align-items-baseline gap-2 mb-2">
-                                <span class="fs-5 fw-bold text-teal">₹{{ "{:,.0f}".format(item.price) }}</span>
+                                <span class="fs-5 fw-bold text-primary">₹{{ "{:,.0f}".format(item.price) }}</span>
                                 {% if item.original_price and item.original_price > item.price %}
                                     <span class="text-muted text-decoration-line-through small">₹{{ "{:,.0f}".format(item.original_price) }}</span>
                                     <span class="badge bg-danger-subtle text-danger small" style="font-size: 0.7rem;">-{{ item.discount_percent }}%</span>
                                 {% endif %}
                             </div>
+                            {% endif %}
 
                             <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-muted small" style="font-size: 0.78rem;">
                                 <span class="text-truncate" style="max-width: 140px;">
@@ -190,6 +145,7 @@
                                 </span>
                                 <span>{{ item.created_at.strftime('%d %b') }}</span>
                             </div>
+                            <a href="{{ url_for('listings.detail', listing_id=item.id) }}" class="btn btn-campus-outline btn-sm mt-3">View Details</a>
                         </div>
                     </div>
                 </div>

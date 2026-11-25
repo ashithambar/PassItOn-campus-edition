@@ -19,8 +19,6 @@ def index():
     # Total counts for stats banner
     total_listings = Listing.query.filter(Listing.status != 'deleted').count()
     total_students = User.query.filter_by(role='student').count()
-    total_sold = Listing.query.filter_by(status='sold').count()
-
     return render_template(
         'index.html',
         categories=categories,
@@ -28,8 +26,7 @@ def index():
         popular_listings=popular_listings,
         featured_listings=featured_listings,
         total_listings=total_listings,
-        total_students=total_students,
-        total_sold=total_sold
+        total_students=total_students
     )
 
 @main_bp.route('/safety')

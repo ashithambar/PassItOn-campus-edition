@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Borrow Requests – PassItOn{% endblock %}
+
+{% block content %}
+<div class="py-3">
+    <h2 class="fw-bold mb-1">Borrow Requests</h2>
+    <p class="text-muted mb-4">Review requests for items you have made available to borrow.</p>
+    {% if borrow_requests %}
+        <div class="table-responsive bg-white rounded-3 border shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light"><tr><th>Item</th><th>Borrower</th><th>Requested Dates</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                    {% for borrow in borrow_requests %}
+                        <tr>
+                            <td>{{ borrow.listing.title }}</td>
+                            <td>{{ borrow.borrower.name }}</td>
+                            <td>{{ borrow.start_date.strftime('%d %b %Y') }} – {{ borrow.expected_return_date.strftime('%d %b %Y') }}</td>
+                            <td><span class="badge bg-primary-subtle text-dark">{{ borrow.display_status|replace('_', ' ')|capitalize }}</span></td>
+                            <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('borrow.detail', borrow_request_id=borrow.id) }}">Manage</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state bg-white rounded-4 border p-5 text-center">
+            <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+            <h5>No borrowing requests have arrived.</h5>
+            <a class="btn btn-campus" href="{{ url_for('dashboard.my_listings') }}">Manage My Listings</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
